@@ -43,3 +43,7 @@ void FrameBuffer::setPoint(int x, int y, const RGBA& color) {
 	std::size_t pixelPos = static_cast<std::size_t>(mappedY) * mWidth + static_cast<std::size_t>(x);
 	mColorBuffer[pixelPos] = color;
 }
+
+void FrameBuffer::setPoint(pixel& p) {
+	setPoint(p.x, p.y, p.color);
+}

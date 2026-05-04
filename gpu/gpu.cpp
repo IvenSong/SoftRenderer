@@ -41,9 +41,18 @@ void GPU::drawPoint(int x, int y, const RGBA& color) {
 	mFrameBuffer->setPoint(x, y, color);
 }
 
-void GPU::drawLine(int x1, int y1, int x2, int y2, const RGBA& color) {
-	pixel p1(x1, y1, color);
-	pixel p2(x2, y2, color);
+void GPU::drawPoint(pixel& p) {
+	drawPoint(p.x, p.y, p.color);
+}
+
+void GPU::drawLine(int x1, int y1, int x2, int y2, const RGBA& color1, const RGBA& color2) {
+	pixel p1(x1, y1, color1);
+	pixel p2(x2, y2, color2);
 	
-	raster::RasterizeLine(p1, p2, color);
+	raster::RasterizeLine(p1, p2);
+}
+
+void GPU::drawLine(pixel& p1, pixel& p2) {
+
+	raster::RasterizeLine(p1, p2);
 }

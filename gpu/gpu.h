@@ -26,7 +26,11 @@ public:
 	//传入像素位置，绘制成某种颜色
 	void drawPoint(int x, int y, const RGBA& color);
 
-	void drawLine(int x1, int y1, int x2, int y2, const RGBA& color);
+	void drawPoint(pixel& p);
+
+	void drawLine(int x1, int y1, int x2, int y2, const RGBA& color1, const RGBA& color2);
+
+	void drawLine(pixel& p1, pixel& p2);
 
 private:
 	static GPU* mInstance;

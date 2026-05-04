@@ -18,6 +18,8 @@ public:
 	//传入像素位置，绘制成某种颜色
 	void setPoint(int x, int y, const RGBA& color);
 
+	void setPoint(pixel& p);
+
 private:
 	uint32_t	mWidth{ 0 };
 	uint32_t	mHeight{ 0 };

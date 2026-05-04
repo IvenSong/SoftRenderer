@@ -4,5 +4,7 @@
 
 namespace raster {
 
-	void RasterizeLine(pixel& p1, pixel& p2, const RGBA& color);
+	void RasterizeLine(pixel& p1, pixel& p2);
+
+	void interpollantLine(pixel& p1, pixel& p2, pixel& target);
 };

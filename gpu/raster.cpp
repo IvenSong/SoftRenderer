@@ -6,7 +6,7 @@ namespace raster {
 
 	//}
 
-	void raster::RasterizeLine(pixel& p1, pixel& p2, const RGBA& color) {
+	void raster::RasterizeLine(pixel& p1, pixel& p2) {
 		int x1 = p1.x;
 		int x2 = p2.x;
 		int y1 = p1.y;
@@ -28,7 +28,9 @@ namespace raster {
 			int p = dx - 2 * dy;
 
 			for (int x = x1; x != x2; x += sx) {
-				sgl->drawPoint(x, y, color);
+				pixel px(x, y);
+				interpollantLine(p1, p2, px);
+				sgl->drawPoint(px);
 				if (p > 0) {
 					p += 2 * dx;
 					y += sy;
@@ -41,7 +43,9 @@ namespace raster {
 			int p = dy - 2 * dx;
 
 			for (int y = y1; y != y2; y += sy) {
-				sgl->drawPoint(x, y, color);
+				pixel px(y, x);
+				interpollantLine(p1, p2, px);
+				sgl->drawPoint(px);
 				if (p > 0) {
 					p += 2 * dy;
 					x += sx;
@@ -49,5 +53,37 @@ namespace raster {
 				p += 2 * dx;
 			}
 		}
+	}
+
+	void interpollantLine(pixel& p1, pixel& p2, pixel& target) {
+
+		float target_distance_x = target.x - p1.x;
+		float total_distance_x = p2.x - p1.x;
+
+
+		float target_distance_y = target.y - p1.y;
+		float total_distance_y = p2.y - p1.y;
+
+		float weight = 1.0f;
+
+		if (std::abs(total_distance_x) > std::abs(total_distance_y)) {
+			weight = target_distance_x / total_distance_x;
+		}
+		else if (std::abs(total_distance_y) > 0) { // 加上 > 0 判断，防止两点重合时除以 0
+			weight = target_distance_y / total_distance_y;
+		}
+
+		RGBA result;
+
+		// 2. 内部隐式转换即可（代码更清爽），但在外部 cast 之前加上 0.5f 实现四舍五入
+		// 128.9 + 0.5 = 129.4 -> 截断为 129 (完美)
+		// 128.2 + 0.5 = 128.7 -> 截断为 128 (完美)
+		result.mR = static_cast<byte>(p2.color.mR * weight + p1.color.mR * (1.0f - weight) + 0.5f);
+		result.mG = static_cast<byte>(p2.color.mG * weight + p1.color.mG * (1.0f - weight) + 0.5f);
+		result.mB = static_cast<byte>(p2.color.mB * weight + p1.color.mB * (1.0f - weight) + 0.5f);
+		result.mA = static_cast<byte>(p2.color.mA * weight + p1.color.mA * (1.0f - weight) + 0.5f);
+
+		// 3. 一次性赋值
+		target.color = result;
 	}
 }
