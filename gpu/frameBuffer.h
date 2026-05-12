@@ -20,9 +20,14 @@ public:
 
 	void setPoint(pixel& p);
 
+	void blendMode(bool blend) {
+		mEnableBlendMode = blend;
+	}
+
 private:
 	uint32_t	mWidth{ 0 };
 	uint32_t	mHeight{ 0 };
 	RGBA*		mColorBuffer{ nullptr };
 	bool		mExternBuffer{ false };
+	bool		mEnableBlendMode{ true };
 };

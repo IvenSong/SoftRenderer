@@ -3,12 +3,14 @@
 #include "frameBuffer.h"
 #include "raster.h"
 #include "../application/application.h"
+#include "Mathlib.h"
+#include "image.h"
 
 #define sgl GPU::getInstance()
 
 /*
 * class GPU：
-* 模拟GPU的绘图行为以及算法等
+* simulate GPU function
 */
 class GPU {
 public:
@@ -20,10 +22,8 @@ public:
 	//接受外界传入的bmp对应的内存指针以及窗体的宽/高
 	void initSurface(const uint32_t& width, const uint32_t& height, void* buffer = nullptr);
 
-	//清除画布内容
 	void clear();
 
-	//传入像素位置，绘制成某种颜色
 	void drawPoint(int x, int y, const RGBA& color);
 
 	void drawPoint(pixel& p);
@@ -32,8 +32,17 @@ public:
 
 	void drawLine(pixel& p1, pixel& p2);
 
+	void drawTriangle(pixel& p1, pixel& p2, pixel& p3);
+
+	RGBA interpollate(pixel& p, pixel& a, pixel& b, pixel& c);
+
+	void drawImage(const image& img, int x, int y);
+
+	void drawImageAlpha(const image& img, int x, int y, int alpha);
+
 private:
 	static GPU* mInstance;
 
 	FrameBuffer* mFrameBuffer{ nullptr };
+
 };

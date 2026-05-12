@@ -41,7 +41,22 @@ void FrameBuffer::setPoint(int x, int y, const RGBA& color) {
 
 	int mappedY = static_cast<int>(mHeight) - 1 - y;
 	std::size_t pixelPos = static_cast<std::size_t>(mappedY) * mWidth + static_cast<std::size_t>(x);
-	mColorBuffer[pixelPos] = color;
+
+	RGBA final_color = color;
+
+	if (mEnableBlendMode) {
+		RGBA src = color;
+		RGBA dst = mColorBuffer[pixelPos];
+
+		float alpha = src.mA / 255.0f;
+
+		final_color.mB = src.mB * alpha + dst.mB * (1 - alpha);
+		final_color.mG = src.mG * alpha + dst.mG * (1 - alpha);
+		final_color.mR = src.mR * alpha + dst.mR * (1 - alpha);
+		final_color.mA = src.mA * alpha + dst.mA * (1 - alpha);
+	}
+
+mColorBuffer[pixelPos] = final_color;
 }
 
 void FrameBuffer::setPoint(pixel& p) {

@@ -25,14 +25,17 @@ namespace raster {
 		*/
 		if (dy < dx) {
 			int y = y1;
-			int p = dx - 2 * dy;
+			int p = 2 * dy - dx;
 
-			for (int x = x1; x != x2; x += sx) {
+			for (int x = x1; ; x += sx) {
 				pixel px(x, y);
 				interpollantLine(p1, p2, px);
 				sgl->drawPoint(px);
+				if (x == x2) {
+					break;
+				}
 				if (p > 0) {
-					p += 2 * dx;
+					p -= 2 * dx;
 					y += sy;
 				}
 				p += 2 * dy;
@@ -40,14 +43,17 @@ namespace raster {
 		}
 		else {
 			int x = x1;
-			int p = dy - 2 * dx;
+			int p = 2 * dx - dy;
 
-			for (int y = y1; y != y2; y += sy) {
-				pixel px(y, x);
+			for (int y = y1; ; y += sy) {
+				pixel px(x, y);
 				interpollantLine(p1, p2, px);
 				sgl->drawPoint(px);
+				if (y == y2) {
+					break;
+				}
 				if (p > 0) {
-					p += 2 * dy;
+					p -= 2 * dy;
 					x += sx;
 				}
 				p += 2 * dx;
@@ -83,7 +89,6 @@ namespace raster {
 		result.mB = static_cast<byte>(p2.color.mB * weight + p1.color.mB * (1.0f - weight) + 0.5f);
 		result.mA = static_cast<byte>(p2.color.mA * weight + p1.color.mA * (1.0f - weight) + 0.5f);
 
-		// 3. 一次性赋值
 		target.color = result;
 	}
 }

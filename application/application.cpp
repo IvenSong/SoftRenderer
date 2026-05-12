@@ -1,7 +1,7 @@
 #include"application.h"
 
 Application* Application::mInstance = nullptr;
-Application* Application::getInstance() {   //单例类构造, 如果第一次创建, 新建一个类, 第二次创建发现不是nullptr, 则直接返回mInstance
+Application* Application::getInstance() {   
 	if (mInstance == nullptr) {
 		mInstance = new Application();
 	}
@@ -40,10 +40,8 @@ bool Application::initApplication(HINSTANCE hInstance, const uint32_t& width, co
 	mWidth = width;
 	mHeight = height;
 
-	//初始化窗体类型，并且注册
 	registerWindowClass(hInstance);
 
-	//生成一个窗体，并且显示
 	if (!createWindow(hInstance)) {
 		return false;
 	}
@@ -105,16 +103,16 @@ ATOM Application::registerWindowClass(HINSTANCE hInstance)
 	WNDCLASSEXW wndClass;
 
 	wndClass.cbSize = sizeof(WNDCLASSEX);
-	wndClass.style = CS_HREDRAW | CS_VREDRAW;	//水平/垂直大小发生变化重绘窗口
+	wndClass.style = CS_HREDRAW | CS_VREDRAW;	// re-paint window when height and width change
 	wndClass.lpfnWndProc = Wndproc;
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
-	wndClass.hInstance = hInstance;		//应用程序句柄
-	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);//应用程序图标,即任务栏的大图标
-	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);//鼠标图标
-	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);//窗口背景色
+	wndClass.hInstance = hInstance;		// application handle
+	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);// application icon
+	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);// mouse icon
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);// windows backgroud color
 	wndClass.lpszMenuName = NULL;
-	wndClass.lpszClassName = mWindowClassName;//窗口类名
+	wndClass.lpszClassName = mWindowClassName;// windows class name
 	wndClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);//窗口标题图标
 
 	return RegisterClassExW(&wndClass);
@@ -135,7 +133,6 @@ BOOL Application::createWindow(HINSTANCE hInstance)
 	auto dwExStyle = WS_EX_APPWINDOW;
 	auto dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
-	//由于存在标题栏等，所以需要计算中间显示区域的大小,比如PopUp的窗体，就没有标题栏，则不会改变
 	RECT windowRect;
 	windowRect.left = 0L;
 	windowRect.top = 0L;
@@ -145,16 +142,16 @@ BOOL Application::createWindow(HINSTANCE hInstance)
 
 	mHwnd = CreateWindowW(
 		mWindowClassName,
-		(LPCWSTR)"GraphicLearning",	//窗体标题
+		(LPCWSTR)"SoftRenderer",	// window head
 		dwStyle,
-		500,//x位置，相对左上角
-		500,//y位置，相对左上角
+		500,// x position
+		500,// y position
 		windowRect.right - windowRect.left,
 		windowRect.bottom - windowRect.top,
-		nullptr,//父窗体
-		nullptr,//菜单栏
-		hInstance,//程序实例
-		nullptr);//额外参数
+		nullptr,// father window
+		nullptr,// menu
+		hInstance,
+		nullptr); // extra parameters
 
 
 	if (!mHwnd)
@@ -183,7 +180,7 @@ void Application::handleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	switch (message)
 	{
 	case WM_CLOSE: {
-		DestroyWindow(hWnd);//此处销毁窗体,会自动发出WM_DESTROY
+		DestroyWindow(hWnd);
 		break;
 	}
 	case WM_PAINT:
@@ -194,7 +191,7 @@ void Application::handleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	}
 	break;
 	case WM_DESTROY: {
-		PostQuitMessage(0);//发出线程终止请求
+		PostQuitMessage(0);
 		mAlive = false;
 		break;
 	}
