@@ -88,8 +88,50 @@ namespace raster {
 		result.mA = static_cast<byte>(p2.color.mA * weight + p1.color.mA * (1.0f - weight) + 0.5f);
 
 		target.color = result;
+	}
+
+	void raster::RasterizeTriangle(pixel& p1, pixel& p2, pixel& p3) {
+		int max_x = max(p1.x, max(p2.x, p3.x));
+		int max_y = max(p1.y, max(p2.y, p3.y));
+		int min_x = min(p1.x, min(p2.x, p3.x));
+		int min_y = min(p1.y, min(p2.y, p3.y));
+
+		for (int i = min_x; i <= max_x; ++i) {
+			for (int j = min_y; j <= max_y; ++j) {
+				pixel p(i, j);
+				raster::interpollantTriangle(p1, p2, p3, p);
+				auto v1 = Math::connect_pixel<float>(p, p1);
+				auto v2 = Math::connect_pixel<float>(p, p2);
+				auto v3 = Math::connect_pixel<float>(p, p3);
+				auto c1 = Math::cross(v1, v2);
+				auto c2 = Math::cross(v2, v3);
+				auto c3 = Math::cross(v3, v1);
+
+				if ((c1 >= 0 && c2 >= 0 && c3 >= 0) ||
+					(c1 <= 0 && c2 <= 0 && c3 <= 0)) {
+					sgl->drawPoint(p);
+				}
+			}
+		}
+	}
+
+	void raster::interpollantTriangle(pixel& p1, pixel& p2, pixel& p3, pixel& target) {
+		auto ab = Math::connect_pixel<float>(p1, p2);
+		auto ac = Math::connect_pixel<float>(p1, p3);
+		float total_area = Math::cross(ab, ac) / 2;
+
+		auto pa = Math::connect_pixel<float>(target, p1);
+		auto pb = Math::connect_pixel<float>(target, p2);
+		auto pc = Math::connect_pixel<float>(target, p3);
+
+		float alpha = Math::cross<float>(pb, pc) / 2 / total_area;
+		float beta = Math::cross<float>(pc, pa) / 2 / total_area;
+		float gamma = Math::cross<float>(pa, pb) / 2 / total_area;
 
 
-
+		// interpollant for uv
+		target.uv = p1.uv * alpha + p2.uv * beta + p3.uv * gamma;
+		// interpollant for color
+		target.color = alpha * p1.color + beta * p2.color + gamma * p3.color;
 	}
 }

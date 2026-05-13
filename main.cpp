@@ -43,9 +43,9 @@ void render() {
     pixel b{ 100, 300, RGBA(0, 255, 0, 255) };
     pixel c{ 700, 300, RGBA(0, 0, 255, 255) };
 
-    // sgl->drawTriangle(a, b, c);
+    sgl->drawTriangle(a, b, c);
 
-    sgl->drawImageAlpha(*img1, 0, 0, 100);
+    // sgl->drawImageAlpha(*img1, 0, 0, 100);
 
     //for (float i = 0; i < 360; i += 10)
     //{
