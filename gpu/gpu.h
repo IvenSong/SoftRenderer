@@ -34,15 +34,21 @@ public:
 
 	void drawTriangle(pixel& p1, pixel& p2, pixel& p3);
 
-	RGBA interpollate(pixel& p, pixel& a, pixel& b, pixel& c);
+	void interpollate(pixel& p, pixel& a, pixel& b, pixel& c);
 
 	void drawImage(const image& img, int x, int y);
 
 	void drawImageAlpha(const image& img, int x, int y, int alpha);
 
+	void setTexture(image* img);
+
 private:
 	static GPU* mInstance;
 
+	bool EnableBlendMode{ true };
+
 	FrameBuffer* mFrameBuffer{ nullptr };
+
+	image* mImage{ nullptr };
 
 };

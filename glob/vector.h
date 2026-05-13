@@ -1,4 +1,5 @@
-#include "base.h"
+#pragma once
+// #include "base.h"
 #include "assert.h"
 
 namespace Math {

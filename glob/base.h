@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cassert> 
 #include <algorithm>
+#include "vector.h"
 
 #define PI 3.14159265358979323
 #define DEG2RAD(theta) (0.01745329251994329 * (theta))
@@ -59,6 +60,7 @@ struct pixel {
     int x;
     int y;
     RGBA color;
+    vec2f uv;
 
 
     pixel(int x, int y, RGBA color) {

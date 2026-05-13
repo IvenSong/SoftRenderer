@@ -75,20 +75,21 @@ namespace raster {
 		if (std::abs(total_distance_x) > std::abs(total_distance_y)) {
 			weight = target_distance_x / total_distance_x;
 		}
-		else if (std::abs(total_distance_y) > 0) { // 加上 > 0 判断，防止两点重合时除以 0
+		else if (std::abs(total_distance_y) > 0) {
 			weight = target_distance_y / total_distance_y;
 		}
 
+		// for color interpollant
 		RGBA result;
 
-		// 2. 内部隐式转换即可（代码更清爽），但在外部 cast 之前加上 0.5f 实现四舍五入
-		// 128.9 + 0.5 = 129.4 -> 截断为 129 (完美)
-		// 128.2 + 0.5 = 128.7 -> 截断为 128 (完美)
 		result.mR = static_cast<byte>(p2.color.mR * weight + p1.color.mR * (1.0f - weight) + 0.5f);
 		result.mG = static_cast<byte>(p2.color.mG * weight + p1.color.mG * (1.0f - weight) + 0.5f);
 		result.mB = static_cast<byte>(p2.color.mB * weight + p1.color.mB * (1.0f - weight) + 0.5f);
 		result.mA = static_cast<byte>(p2.color.mA * weight + p1.color.mA * (1.0f - weight) + 0.5f);
 
 		target.color = result;
+
+
+
 	}
 }

@@ -66,7 +66,7 @@ void GPU::drawTriangle(pixel& p1, pixel& p2, pixel& p3) {
 	for (int i = min_x; i <= max_x; ++i) {
 		for (int j = min_y; j <= max_y; ++j) {
 			pixel p(i, j);
-			p.color = interpollate(p, p1, p2, p3);
+			interpollate(p, p1, p2, p3);
 			auto v1 = Math::connect_pixel<float>(p, p1);
 			auto v2 = Math::connect_pixel<float>(p, p2);
 			auto v3 = Math::connect_pixel<float>(p, p3);
@@ -82,7 +82,7 @@ void GPU::drawTriangle(pixel& p1, pixel& p2, pixel& p3) {
 	}
 }
 
-RGBA GPU::interpollate(pixel& p, pixel& a, pixel& b, pixel& c) {
+void GPU::interpollate(pixel& p, pixel& a, pixel& b, pixel& c) {
 	auto ab = Math::connect_pixel<float>(a, b);
 	auto ac = Math::connect_pixel<float>(a, c);
 	float total_area = Math::cross(ab, ac) / 2;
@@ -95,9 +95,11 @@ RGBA GPU::interpollate(pixel& p, pixel& a, pixel& b, pixel& c) {
 	float beta = Math::cross<float>(pc, pa) / 2 / total_area;
 	float gamma = Math::cross<float>(pa, pb) / 2 / total_area;
 
-	RGBA result = alpha * a.color + beta * b.color + gamma * c.color;
 
-	return result;
+	// interpollant for uv
+	p.uv = a.uv * alpha + b.uv * beta + c.uv * gamma;
+	// interpollant for color
+	p.color = alpha * a.color + beta * b.color + gamma * c.color;
 }
 
 
@@ -124,4 +126,8 @@ void GPU::drawImageAlpha(const image& img, int x, int y, int alpha) {
 			drawPoint(i, j, img.mData[j * img.mWidth + i]);
 		}
 	}
+}
+
+void GPU::setTexture(image* img) {
+	mImage = img;
 }

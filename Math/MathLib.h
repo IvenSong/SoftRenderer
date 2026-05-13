@@ -1,6 +1,5 @@
 #pragma once
 #include "base.h"
-#include "vector.h"
 
 
 namespace Math {

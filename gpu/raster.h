@@ -1,6 +1,7 @@
 #pragma once
 #include "base.h"
 #include "gpu.h"
+#include "math.h"
 
 namespace raster {
 
