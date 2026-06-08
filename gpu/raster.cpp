@@ -109,7 +109,14 @@ namespace raster {
 
 				if ((c1 >= 0 && c2 >= 0 && c3 >= 0) ||
 					(c1 <= 0 && c2 <= 0 && c3 <= 0)) {
-					sgl->drawPoint(p);
+					RGBA resultColor;
+					if (sgl->getTexture()) {
+						resultColor = sgl->BilinearInterpolation(p.uv);
+					}
+					else {
+						resultColor = p.color;
+					}
+					sgl->drawPoint(p.x, p.y, resultColor);
 				}
 			}
 		}

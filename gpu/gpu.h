@@ -40,6 +40,27 @@ public:
 
 	void setTexture(image* img);
 
+	image* getTexture() {
+		return mImage;
+	}
+
+	RGBA nearestSampling(const vec2f uv) {
+		auto UV = uv;
+
+		int x = std::round(UV.x * (mImage->mWidth - 1));
+		int y = std::round(UV.y * (mImage->mHeight - 1));
+
+		int position = y * mImage->mWidth + x;
+
+		return mImage->mData[position];
+	}
+
+	RGBA BilinearInterpolation(const vec2f& UV);
+
+	void setTextureWrap(int n);
+
+	vec2f checkWrap(const vec2f& UV);
+
 private:
 	static GPU* mInstance;
 
@@ -49,4 +70,7 @@ private:
 
 	image* mImage{ nullptr };
 
+	RGBA lerp(const RGBA& c1, const RGBA& c2, float weight);
+
+	int mWrap{ TEXTURE_WRAP_REPEAT };
 };

@@ -13,6 +13,9 @@
 #define DEG2RAD(theta) (0.01745329251994329 * (theta))
 #define FRACTION(v) ((v) - (int)(v))
 
+#define TEXTURE_WRAP_REPEAT 0
+#define TEXTURE_WRAP_MIRROR 1
+
 using byte = unsigned char;
 
 struct RGBA {
@@ -61,6 +64,8 @@ struct pixel {
     int y;
     RGBA color;
     vec2f uv;
+
+    pixel() = default;
 
 
     pixel(int x, int y, RGBA color) {

@@ -11,8 +11,6 @@ add_subdirectory(glob)
 add_subdirectory(Math)
 
 
-
-
 add_executable(softRenderer "main.cpp")
 
 # copy assets into executable file

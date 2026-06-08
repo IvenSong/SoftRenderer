@@ -22,7 +22,7 @@ image* image::createImage(std::string path) {
 
     // int default, stb_image reckon that the top left corner is the origin of this image
     // but we want that the left buttom corner to be the origin, so we use this two convert it
-    stbi_set_flip_vertically_on_load(false);
+    stbi_set_flip_vertically_on_load(true);
 
     unsigned char* bits = stbi_load(path.c_str(), &width, &height, &imageType, STBI_rgb_alpha);
     // since color in Windows GDI is GBRA, we need to exchange G and R
