@@ -223,6 +223,21 @@ namespace Math {
 			return vector4<E>(-x, -y, -z, -w);
 		}
 	};
+
+	template <class E>
+	vector2<E> operator*(E scalar, const vector2<E>& vector) {
+		return vector * scalar;
+	}
+
+	template <class E>
+	vector3<E> operator*(E scalar, const vector3<E>& vector) {
+		return vector * scalar;
+	}
+
+	template <class E>
+	vector4<E> operator*(E scalar, const vector4<E>& vector) {
+		return vector * scalar;
+	}
 }
 
 using vec2i = Math::vector2<int>;

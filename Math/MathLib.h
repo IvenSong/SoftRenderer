@@ -311,7 +311,7 @@ namespace Math {
 
 		vector4<E> dstCol = col4 + x * col1 + y * col2 + z * col3;
 
-		result.setColum(dstCol, 4);
+		result.setColum(dstCol, 3);
 
 		return result;
 
@@ -322,6 +322,8 @@ namespace Math {
 	Matrix44<E> translate(const mat4f& src, vector3<E>& v) {
 		return translate(src, v.x, v.y, v.z);
 	}
+
+
 	template <typename E>
 	Matrix44<E> rotate(const mat4f& src, float theta, vector3<E>& v) {
 		Matrix44<E> rotate;
@@ -330,8 +332,8 @@ namespace Math {
 		float s = std::sin(theta);
 		float c = std::cos(theta);
 
-		vector3<T> axis = normalize(v);
-		vector3<T> minus_c((1 - c) * axis); // for simplifying the part u_x/y/z * (1 - cos theta)
+		vector3<E> axis = normalize(v);
+		vector3<E> minus_c((1 - c) * axis); // for simplifying the part u_x/y/z * (1 - cos theta)
 		rotate.set(0, 0, minus_c[0] * axis[0] + c);
 		rotate.set(1, 0, minus_c[0] * axis[1] + s * axis[2]);
 		rotate.set(2, 0, minus_c[0] * axis[2] - s * axis[1]);
@@ -361,12 +363,64 @@ namespace Math {
 		auto col2 = srcCol0 * rCol2[0] + srcCol1 * rCol2[1] + srcCol2 * rCol2[2];
 		auto col3 = srcCol3;
 
-		Matrix44<T> result(src);
 
 		result.setColum(col0, 0);
 		result.setColum(col1, 1);
 		result.setColum(col2, 2);
 		result.setColum(col3, 3);
+
+		return result;
+	}
+
+
+	// Orthogonal Projection
+	template<typename T>
+	Matrix44<T> orthographic(T left, T right, T bottom, T top, T near, T far) {
+		Matrix44<T> result(static_cast<T>(1));
+
+		result.set(0, 0, static_cast<T>(2) / (right - left));
+		result.set(0, 3, -(right + left) / (right - left));
+		result.set(1, 1, static_cast<T>(2) / (top - bottom));
+		result.set(1, 3, -(top + bottom) / (top - bottom));
+		result.set(2, 2, -static_cast<T>(2) / (far - near));
+		result.set(2, 3, -(far + near) / (far - near));
+
+		return result;
+	}
+
+	//Perspective Projection
+	// 这里的fov是y方向的fov
+	template<typename T>
+	Matrix44<T> perspective(T fovy, T aspect, T n, T f) {
+		T const tanHalfFovy = std::tan(DEG2RAD(fovy / static_cast<T>(2)));
+
+		Matrix44<T> result(static_cast<T>(0));
+		result.set(0, 0, static_cast<T>(1) / (aspect * tanHalfFovy));
+		result.set(1, 1, static_cast<T>(1) / (tanHalfFovy));
+		result.set(2, 2, -(f + n) / (f - n));
+		result.set(2, 3, -static_cast<T>(2) * f * n / (f - n));
+		result.set(3, 2, -static_cast<T>(1));
+
+		return result;
+	}
+
+
+	// Screen space transformation
+	template<typename T>
+	Matrix44<T> screenMatrix(const uint32_t& width, const uint32_t& height) {
+		Matrix44<T> result(static_cast<T>(1));
+
+		//x
+		result.set(0, 0, static_cast<T>(width) / static_cast<T>(2));
+		result.set(0, 3, static_cast<T>(width) / static_cast<T>(2));
+
+		//y
+		result.set(1, 1, static_cast<T>(height) / static_cast<T>(2));
+		result.set(1, 3, static_cast<T>(height) / static_cast<T>(2));
+
+		//z
+		result.set(2, 2, 0.5f);
+		result.set(2, 3, 0.5f);
 
 		return result;
 	}

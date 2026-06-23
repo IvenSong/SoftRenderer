@@ -9,6 +9,7 @@
 #pragma comment(linker, "/subsystem:console /entry:wWinMainCRTStartup") // 这里的subsystem:console 是显示控制台, console改成windows就是不显示控制台
 
 image* img1 = image::createImage("assets/texture/img1.jpg");
+image* img2 = image::createImage("assets/texture/HD5I_yPbgAAoUAA.jpg");
 
 float speed = 0.6;
 
@@ -27,6 +28,7 @@ pixel c{ 800, 800, RGBA(0, 0, 255, 255) };
 pixel d{ 800, 0, RGBA(0, 0, 255, 255) };
 
 void render();
+void renderRotatingTriangleExperiment();
 
 int APIENTRY wWinMain(
     _In_ HINSTANCE hInstance,         // Instance Handle: 本应用程序实例句柄，唯一指代当前程序
@@ -47,7 +49,7 @@ int APIENTRY wWinMain(
 
     while (alive) {
         alive = app->peekMessage();
-        render();
+        renderRotatingTriangleExperiment();
         app->show();
     }
     return 0;
@@ -107,4 +109,68 @@ void change_uv(vec2f& uv) {
 
 void prepare_wrap() {
 
+}
+
+void renderRotatingTriangleExperiment() {
+    static float angle = 0.0f;
+
+    const vec4f vertices[3] = {
+        vec4f(-0.8f, -0.6f, 0.0f, 1.0f),
+        vec4f(0.8f, -0.6f, 0.0f, 1.0f),
+        vec4f(0.0f, 0.8f, 0.0f, 1.0f)
+    };
+
+    vec3f rotationAxis(0.4f, 1.0f, 0.2f);
+
+    mat4f model(1.0f);
+    model = Math::translate(model, 0.0f, 0.0f, -3.0f);
+    model = Math::rotate(model, angle, rotationAxis);
+
+    const float aspect = static_cast<float>(app->getWidth()) /
+        static_cast<float>(app->getHeight());
+    static mat4f projection = Math::perspective(60.0f, aspect, 0.1f, 100.0f);
+    static int back = 1;
+    if (projection.get(0, 3) > 3 || projection.get(0, 3) < -3) {
+        back *= -1;
+    }
+    projection.set(0, 3, projection.get(0, 3) + 0.01 * back);
+    mat4f screen = Math::screenMatrix<float>(app->getWidth(), app->getHeight());
+    mat4f transform = screen * projection * model;
+
+    vec4f transformed[3] = {
+        transform * vertices[0],
+        transform * vertices[1],
+        transform * vertices[2]
+    };
+
+    for (const vec4f& vertex : transformed) {
+        if (std::abs(vertex.w) < 0.00001f) {
+            return;
+        }
+    }
+
+    pixel triangle[3] = {
+        pixel(static_cast<int>(transformed[0].x / transformed[0].w),
+            static_cast<int>(transformed[0].y / transformed[0].w),
+            RGBA(255, 80, 80, 255)),
+        pixel(static_cast<int>(transformed[1].x / transformed[1].w),
+            static_cast<int>(transformed[1].y / transformed[1].w),
+            RGBA(80, 255, 120, 255)),
+        pixel(static_cast<int>(transformed[2].x / transformed[2].w),
+            static_cast<int>(transformed[2].y / transformed[2].w),
+            RGBA(80, 140, 255, 255))
+    };
+
+    triangle[0].uv = vec2f(0.0f, 0.0f);
+    triangle[1].uv = vec2f(1.0f, 0.0f);
+    triangle[2].uv = vec2f(0.5f, 1.0f);
+
+    sgl->clear();
+    sgl->setTexture(img2);
+    sgl->drawTriangle(triangle[0], triangle[1], triangle[2]);
+
+    angle += 0.02f;
+    if (angle >= 2.0f * PI) {
+        angle -= static_cast<float>(2.0 * PI);
+    }
 }
