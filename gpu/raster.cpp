@@ -1,10 +1,12 @@
 #include "raster.h"
+#include "gpu.h"
 
 namespace raster {
 
-	// void raster::RasterizeLine(pixel p) {
-
-	//}
+	template <typename T>
+	T lerp(const T& v0, const T& v1, float target) {
+		return v0 * (1.0f - target) + v1 * target;
+	}
 
 	void raster::RasterizeLine(pixel& p1, pixel& p2) {
 		int x1 = p1.x;
@@ -90,6 +92,9 @@ namespace raster {
 		target.color = result;
 	}
 
+
+	}
+
 	void raster::RasterizeTriangle(pixel& p1, pixel& p2, pixel& p3) {
 		int max_x = max(p1.x, max(p2.x, p3.x));
 		int max_y = max(p1.y, max(p2.y, p3.y));
@@ -141,4 +146,32 @@ namespace raster {
 		// interpollant for color
 		target.color = alpha * p1.color + beta * p2.color + gamma * p3.color;
 	}
+
+	// ----------------------Rendering Pipeline Version-----------------------
+
+	// rendering pipeline version
+	void interpollantLine(const VsOutput& v0, const VsOutput& v1, VsOutput& target) {
+		float target_distance_x = target.mPosition.x - v0.mPosition.x;
+		float total_distance_x = v1.mPosition.x - v0.mPosition.x;
+
+		float target_distance_y = target.mPosition.y - v0.mPosition.y;
+		float total_distance_y = v1.mPosition.y - v0.mPosition.y;
+
+		float weight = 1.0f;
+
+		if (std::abs(total_distance_x) > std::abs(total_distance_y)) {
+			weight = target_distance_x / total_distance_x;
+		}
+		else if (std::abs(total_distance_y) > 0.0f) {
+			weight = target_distance_y / total_distance_y;
+		}
+
+		// target.mPosition = lerp(v0.mPosition, v1.mPosition, weight);
+		target.mColor = raster::lerp(v0.mColor, v1.mColor, weight);
+		target.mUV = raster::lerp(v0.mUV, v1.mUV, weight);
 }
+
+
+
+
+

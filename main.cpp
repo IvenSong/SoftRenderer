@@ -39,6 +39,8 @@ int APIENTRY wWinMain(
     if (!app->initApplication(hInstance, 800, 600)) {
         return -1;
     }
+    auto v = Math::normalize(vec3f(3, 0, 4));
+    std::cout << v.x << v.y << v.z;
 
 
     bool alive = true;
@@ -161,12 +163,13 @@ void renderRotatingTriangleExperiment() {
             RGBA(80, 140, 255, 255))
     };
 
+    // set img uv
     triangle[0].uv = vec2f(0.0f, 0.0f);
     triangle[1].uv = vec2f(1.0f, 0.0f);
     triangle[2].uv = vec2f(0.5f, 1.0f);
 
     sgl->clear();
-    sgl->setTexture(img2);
+    sgl->setTexture(nullptr);
     sgl->drawTriangle(triangle[0], triangle[1], triangle[2]);
 
     angle += 0.02f;

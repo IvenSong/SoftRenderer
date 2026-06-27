@@ -1,4 +1,4 @@
-add_library(gpuLib "gpu.cpp" "gpu.h" "frameBuffer.cpp" "frameBuffer.h" "raster.cpp" "raster.h")
+add_library(gpuLib "gpu.cpp" "gpu.h" "frameBuffer.cpp" "frameBuffer.h" "raster.cpp" "raster.h" "dataStructure.h" "BufferObject.h" "BufferObject.cpp")
 
 target_link_libraries(gpuLib PUBLIC baseLib)
 target_link_libraries(gpuLib PUBLIC MathLib)

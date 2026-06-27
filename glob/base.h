@@ -24,6 +24,14 @@ struct RGBA {
     byte mR;
     byte mA;
 
+    static byte clampChannel(float value) {
+        return static_cast<byte>(std::clamp(value, 0.0f, 255.0f));
+    }
+
+    static byte clampChannel(int value) {
+        return static_cast<byte>(std::clamp(value, 0, 255));
+    }
+
     RGBA(
         byte r = 255,
         byte g = 255,
@@ -38,20 +46,63 @@ struct RGBA {
 
     RGBA operator+(const RGBA& other) const {
         return RGBA(
-            static_cast<byte>(std::clamp((int)mR + other.mR, 0, 255)),
-            static_cast<byte>(std::clamp((int)mG + other.mG, 0, 255)),
-            static_cast<byte>(std::clamp((int)mB + other.mB, 0, 255)),
-            static_cast<byte>(std::clamp((int)mA + other.mA, 0, 255))
+            clampChannel((int)mR + other.mR),
+            clampChannel((int)mG + other.mG),
+            clampChannel((int)mB + other.mB),
+            clampChannel((int)mA + other.mA)
         );
+    }
+
+    RGBA& operator+=(const RGBA& other) {
+        *this = *this + other;
+        return *this;
+    }
+
+    RGBA operator-(const RGBA& other) const {
+        return RGBA(
+            clampChannel((int)mR - other.mR),
+            clampChannel((int)mG - other.mG),
+            clampChannel((int)mB - other.mB),
+            clampChannel((int)mA - other.mA)
+        );
+    }
+
+    RGBA& operator-=(const RGBA& other) {
+        *this = *this - other;
+        return *this;
     }
 
     RGBA operator*(float scalar) const {
         return RGBA(
-            static_cast<byte>(std::clamp(mR * scalar, 0.0f, 255.0f)),
-            static_cast<byte>(std::clamp(mG * scalar, 0.0f, 255.0f)),
-            static_cast<byte>(std::clamp(mB * scalar, 0.0f, 255.0f)),
-            static_cast<byte>(std::clamp(mA * scalar, 0.0f, 255.0f))
+            clampChannel(mR * scalar),
+            clampChannel(mG * scalar),
+            clampChannel(mB * scalar),
+            clampChannel(mA * scalar)
         );
+    }
+
+    RGBA& operator*=(float scalar) {
+        *this = *this * scalar;
+        return *this;
+    }
+
+    RGBA operator/(float scalar) const {
+        assert(scalar != 0.0f);
+        if (scalar == 0.0f) {
+            return RGBA(0, 0, 0, 0);
+        }
+
+        return RGBA(
+            clampChannel(mR / scalar),
+            clampChannel(mG / scalar),
+            clampChannel(mB / scalar),
+            clampChannel(mA / scalar)
+        );
+    }
+
+    RGBA& operator/=(float scalar) {
+        *this = *this / scalar;
+        return *this;
     }
 
     friend RGBA operator*(float scalar, const RGBA& c) {

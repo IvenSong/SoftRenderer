@@ -5,6 +5,7 @@
 #include "../application/application.h"
 #include "Mathlib.h"
 #include "image.h"
+#include "dataStructure.h"
 
 #define sgl GPU::getInstance()
 
@@ -23,6 +24,8 @@ public:
 	void initSurface(const uint32_t& width, const uint32_t& height, void* buffer = nullptr);
 
 	void clear();
+
+	// Original GPU Simulation (can be discarded)
 
 	void drawPoint(int x, int y, const RGBA& color);
 
@@ -61,12 +64,37 @@ public:
 
 	vec2f checkWrap(const vec2f& UV);
 
+	// -----------------Original GPU Simulation End----------------------
+
+	// ------------Rendering Pipeline----------
+
+	// keep initSurface and clear functions
+
+	uint32_t genBuffer();
+	void deleteBuffer(const uint32_t& bufferID);
+
+	uint32_t genVertexArray(const uint32_t& vaoID);
+	void deleteVerrtexArray(const uint32_t vaoID);
+
+
 private:
 	static GPU* mInstance;
+	FrameBuffer* mFrameBuffer{ nullptr };
 
-	bool EnableBlendMode{ true };
+	// VBO related and EBO
+	uint32_t mBufferCounter{ 0 }; // number of VBO
+	std::map<uint32_t, BufferObject*> mBufferMap;
+
+	// VAO related
+	uint32_t mVaoCounter{ 0 };
+	std::map<uint32_t, VertexArrayObject*> mBufferMap;
+
+
+	// Original GPU Simulation (can be discarded)
 
 	FrameBuffer* mFrameBuffer{ nullptr };
+
+	bool EnableBlendMode{ true };
 
 	image* mImage{ nullptr };
 
