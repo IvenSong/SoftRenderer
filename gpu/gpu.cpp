@@ -330,6 +330,47 @@ void GPU::drawElement(const uint32_t& drawMode, const uint32_t& first, const uin
 	}
 }
 
+void GPU::enable(const uint32_t& value)
+{
+	switch (value) {
+	case CULL_FACE:
+		mEnableCullFace = true;
+		break;
+
+	case DEPTH_TEST:
+		mEnableDepthTest = true;
+		break;
+	default:
+		break;
+	}
+}
+
+void GPU::disable(const uint32_t& value)
+{
+	switch (value) {
+	case CULL_FACE:
+		mEnableCullFace = false;
+		break;
+
+	case DEPTH_TEST:
+		mEnableDepthTest = false;
+		break;
+	default:
+		break;
+	}
+}
+
+void GPU::frontFace(const uint32_t& value)
+{
+	mFrontFace = value;
+}
+
+void GPU::cullFace(const uint32_t& value)
+{
+	mCullFace = value;
+}
+
+
 void GPU::vertexShaderStage(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao, const BufferObject* ebo, const uint32_t first, const uint32_t count)
 {
 	auto bindingMap = vao->getBindingMap();
