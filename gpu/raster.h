@@ -3,26 +3,48 @@
 #include "dataStructure.h"
 #include "Mathlib.h"
 
-namespace raster {
+class raster {
+public:
+	raster();
+	~raster();
 
-	void RasterizeLine(pixel& p1, pixel& p2);
+	static void rasterize(
+		std::vector<VsOutput>& results,
+		const uint32_t& drawMode,
+		const std::vector<VsOutput>& inputs
+	);
 
-	void interpollantLine(pixel& p1, pixel& p2, pixel& target);
+	static void RasterizeLine(pixel& p1, pixel& p2);
 
-	void RasterizeTriangle(pixel& p1, pixel& p2, pixel& p3);
+	static void interpollantLine(pixel& p1, pixel& p2, pixel& target);
 
-	void interpollantTriangle(pixel& p1, pixel& p2, pixel& p3, pixel& target);
+	static void RasterizeTriangle(pixel& p1, pixel& p2, pixel& p3);
+
+	static void interpollantTriangle(pixel& p1, pixel& p2, pixel& p3, pixel& target);
 
 	// ---------------------Rendering Pipeline Reconstruction------------------
-	void rasterizeLine(const VsOutput& v0, const VsOutput& v1);
+private:
+	static void rasterizeLine(
+		std::vector<VsOutput>& result,
+		const VsOutput& v0,
+		const VsOutput& v1
+		);
 
-	void interpollantLine(const VsOutput& v0, const VsOutput& v1, VsOutput& target);
+	static void interpollantLine(const VsOutput& v0, const VsOutput& v1, VsOutput& target);
 
-	void rasterizeTriangle(std::vector<VsOutput> result, const VsOutput& v0, const VsOutput& v1, const VsOutput& v2);
+	static void rasterizeTriangle(
+		std::vector<VsOutput>& result, 
+		const VsOutput& v0, const VsOutput& v1, 
+		const VsOutput& v2);
 
-	void interpollantTriangle(const VsOutput& v0, const VsOutput& v1, const VsOutput& v2, const VsOutput& target);
+	static void interpollantTriangle(const VsOutput& v0, const VsOutput& v1, const VsOutput& v2, VsOutput& target);
 	
 	template <typename T>
-	T lerp(const T& v0, const T& v1, float target);
+	static T lerp(const T& v0, const T& v1, float target);
 
 };
+
+
+
+#define DRAW_LINES 0
+#define DRAW_TRIANGLES 1

@@ -36,9 +36,19 @@ namespace Math {
 			return vector2<E>(x * n, y * n);
 		}
 
+		vector2<E> operator*(const vector2<E>& v) const {
+			return vector2<E>(x * v.x, y * v.y);
+		}
+
 		vector2<E>& operator*=(E n) {
 			x *= n;
 			y *= n;
+			return *this;
+		}
+
+		vector2<E>& operator*=(const vector2<E>& v) {
+			x *= v.x;
+			y *= v.y;
 			return *this;
 		}
 		vector2<E> operator/(E n) const {
@@ -110,10 +120,21 @@ namespace Math {
 			return vector3<E>(x * n, y * n, z * n);
 		}
 
+		vector3<E> operator*(const vector3<E>& v) const {
+			return vector3<E>(x * v.x, y * v.y, z * v.z);
+		}
+
 		vector3<E>& operator*=(E n) {
 			x *= n;
 			y *= n;
 			z *= n;
+			return *this;
+		}
+
+		vector3<E>& operator*=(const vector3<E>& v) {
+			x *= v.x;
+			y *= v.y;
+			z *= v.z;
 			return *this;
 		}
 		vector3<E> operator/(E n) const {
@@ -165,6 +186,15 @@ namespace Math {
 		E w;
 		vector4() : x(0), y(0), z(0), w(0) {};
 		vector4(E x, E y, E z, E w) : x(x), y(y), z(z), w(w) {};
+
+		explicit operator vector2<E>() const {
+			return vector2<E>(x, y);
+		}
+
+		explicit operator vector3<E>() const {
+			return vector2<E>(x, y, z);
+		}
+
 		vector4<E> operator+(const vector4<E>& v) const {
 			return vector4(x + v.x, y + v.y, z + v.z, w + v.w);
 		}
@@ -188,11 +218,23 @@ namespace Math {
 		vector4<E> operator*(E n) const {
 			return vector4<E>(x * n, y * n, z * n, w * n);
 		}
+
+		vector4<E> operator*(const vector4<E>& v) const {
+			return vector4<E>(x * v.x, y * v.y, z * v.z, w * v.w);
+		}
 		vector4<E>& operator*=(E n) {
 			x *= n;
 			y *= n;
 			z *= n;
 			w *= n;
+			return *this;
+		}
+
+		vector4<E>& operator*=(const vector4<E>& v) {
+			x *= v.x;
+			y *= v.y;
+			z *= v.z;
+			w *= v.w;
 			return *this;
 		}
 		vector4<E> operator/(E n) const {

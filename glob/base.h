@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cassert> 
 #include <algorithm>
+#include <memory>
 #include "vector.h"
 
 #define PI 3.14159265358979323

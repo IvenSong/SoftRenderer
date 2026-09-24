@@ -8,9 +8,11 @@ public:
 	BufferObject(const BufferObject&) = delete; // ½ûÖ¹¿½±´¹¹Ôìº¯Êý
 
 	void setBufferData(size_t dataSize, void* data);
-	byte* getBuffer() const;
+	const std::byte* getBuffer() const;
 
 private:
 	size_t mBufferSize{ 0 }; // # of bytes
-	byte* mBuffer{ nullptr }; // 
+	std::vector<std::byte> mBuffer; // 
+
+
 };

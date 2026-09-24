@@ -141,8 +141,10 @@ namespace Math {
 			return result;
 		}
 
-		vector4<T> operator*(const vector4<T>& v) {
-			return vector4(
+		// Matrix-vector multiplication: result = M * v.
+		// The matrix is stored in column-major order.
+		vector4<T> operator*(const vector4<T>& v) const {
+			return vector4<T>(
 				v.x * m[0] + v.y * m[4] + v.z * m[8] + v.w * m[12],
 				v.x * m[1] + v.y * m[5] + v.z * m[9] + v.w * m[13],
 				v.x * m[2] + v.y * m[6] + v.z * m[10] + v.w * m[14],

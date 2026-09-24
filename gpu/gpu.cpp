@@ -23,6 +23,7 @@ void GPU::initSurface(const uint32_t& width, const uint32_t& height, void* buffe
 	}
 
 	mFrameBuffer = new FrameBuffer(width, height, buffer);
+	mScreenMatrix = Math::screenMatrix<float>(width - 1, height - 1);
 }
 
 void GPU::clear() {
@@ -155,4 +156,177 @@ vec2f GPU::checkWrap(const vec2f& UV) {
 		}
 	}
 	return uv;
+}
+
+
+
+uint32_t GPU::genBuffer() {
+	const uint32_t bufferID = ++mBufferCounter;
+
+	mBufferMap.emplace(bufferID, std::make_unique<BufferObject>());
+
+	return bufferID;
+}
+
+bool GPU::deleteBuffer(const uint32_t bufferID) {
+	return mBufferMap.erase(bufferID) != 0;
+}
+
+uint32_t GPU::genVertexArray() {
+	const uint32_t vaoID = ++mVaoCounter;
+	mVAOMap.emplace(vaoID, std::make_unique<VertexArrayObject>());
+	return vaoID;
+}
+
+bool GPU::deleteVertexArray(const uint32_t vaoID) {
+	return mVAOMap.erase(vaoID) != 0;
+}
+
+
+void GPU::bindBuffer(const uint32_t& bufferType, const uint32_t& bufferID) {
+	if (bufferType == ARRAY_BUFFER) {
+		mCurrentVBO = bufferID;
+	}
+	else if (bufferType == ELEMENT_ARRAY_BUFFER) {
+		mCurrentEBO = bufferID;
+	}
+}
+
+void GPU::bufferData(const uint32_t& bufferType, size_t dataSize, void* data) {
+	uint32_t bufferID;
+	if (bufferType == ARRAY_BUFFER) {
+		bufferID = mCurrentVBO;
+	}
+	else if (bufferType == ELEMENT_ARRAY_BUFFER) {
+		bufferID = mCurrentEBO;
+	}
+	else {
+		assert(false);
+	}
+
+	auto iter = mBufferMap.find(bufferID);
+	if (iter == mBufferMap.end()) {
+		assert(false);
+	}
+
+	std::unique_ptr<BufferObject>& bufferObject = iter->second;
+	bufferObject->setBufferData(dataSize, data);
+}
+
+void GPU::bindVertexArray(const uint32_t& vaoID) {
+	mCurrentVAO = vaoID;
+}
+void GPU::vertexAttributePointer(
+	const uint32_t binding,
+	const uint32_t itemSize,
+	const uint32_t stride,
+	const uint32_t offset
+) {
+	auto iter = mVAOMap.find(mCurrentVAO);
+	if (iter == mVAOMap.end()) {
+		assert(false);
+	}
+
+	auto& vao = iter->second;
+	vao->set(binding, mCurrentVBO, itemSize, stride, offset);
+}
+
+void GPU::useProgram(Shader* shader)
+{
+	mShader = shader;
+}
+
+/*
+drawMode: primitive drawing mode, such as triangles or lines
+first:    index of the first vertex/index to process
+count:    number of vertices/indices to process
+*/
+void GPU::drawElement(const uint32_t& drawMode, const uint32_t& first, const uint32_t& count)
+{
+	if (mCurrentVAO == 0 || !mShader || count == 0) {
+		return;
+	}
+
+	// Get VAO
+	auto vaoIter = mVAOMap.find(mCurrentVAO);
+	if (vaoIter == mVAOMap.end()) {
+		std::cerr << "Error: current VAO is invalid" << std::endl;
+		return;
+	}
+
+	const VertexArrayObject* vao = vaoIter->second.get();
+	auto bindingMap = vao->getBindingMap();
+
+	// Get EBO
+	auto eboIter = mBufferMap.find(mCurrentEBO);
+	if (eboIter == mBufferMap.end()) {
+		std::cerr << "Error: current VAO is invalid" << std::endl;
+		return;
+	}
+
+	const BufferObject* ebo = eboIter->second.get();
+
+	/* 
+	* VertexShader process
+	* Process vertices according to input EBO and put them into VsOutput
+	*/
+	std::vector<VsOutput> vsOutputs{};
+	vertexShaderStage(vsOutputs, vao, ebo, first, count);
+
+	if (vsOutputs.empty()) return;
+
+	/* NDC Process: convert vertex into NDC*/
+	for (auto& output : vsOutputs) {
+		perspectiveDivision(output);
+	}
+
+	/*Screen Mapping*/
+
+	for (auto& output : vsOutputs) {
+		screenMapping(output);
+	}
+
+	/* Rasterization */
+	std::vector<VsOutput> rasterOutputs;
+	raster::rasterize(rasterOutputs, drawMode, vsOutputs);
+
+	if (rasterOutputs.empty()) return;
+
+	/* Color Output Process*/
+
+	FsOutput fsOutput;
+	uint32_t pixelPos = 0;
+	for (uint32_t i = 0; i < rasterOutputs.size(); ++i) {
+		mShader->fragmentShader(rasterOutputs[i], fsOutput);
+		pixelPos = fsOutput.mPixelPos.y * mFrameBuffer->getWidth() + fsOutput.mPixelPos.x;
+		mFrameBuffer->mColorBuffer[pixelPos] = fsOutput.mColor;
+	}
+}
+
+void GPU::vertexShaderStage(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao, const BufferObject* ebo, const uint32_t first, const uint32_t count)
+{
+	auto bindingMap = vao->getBindingMap();
+	const std::byte* indicesData = ebo->getBuffer();
+
+	uint32_t index = 0; 
+	for (uint32_t i = first; i < first + count; ++i) {
+		size_t indicesOffset = i * sizeof(uint32_t);
+		memcpy(&index, indicesData + indicesOffset, sizeof(uint32_t));
+
+		VsOutput output = mShader->vertexShader(bindingMap, mBufferMap, index);
+		vsOutputs.push_back(output);
+	}
+}
+
+void GPU::perspectiveDivision(VsOutput& vsOutput)
+{
+	float oneOverW = 1.0f / vsOutput.mPosition.w;
+
+	vsOutput.mPosition *= oneOverW;
+	vsOutput.mPosition.w = 1.0f;
+}
+
+void GPU::screenMapping(VsOutput& vsOutput)
+{
+	vsOutput.mPosition = mScreenMatrix * vsOutput.mPosition;
 }

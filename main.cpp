@@ -5,11 +5,16 @@
 #include "frameBuffer.h"
 #include "MathLib.h"
 #include "matrix.h"
+#include "Shader/defaultShader.h"
 
 #pragma comment(linker, "/subsystem:console /entry:wWinMainCRTStartup") // 这里的subsystem:console 是显示控制台, console改成windows就是不显示控制台
 
 image* img1 = image::createImage("assets/texture/img1.jpg");
 image* img2 = image::createImage("assets/texture/HD5I_yPbgAAoUAA.jpg");
+
+void render_test_stateMachine();
+
+void render_test_pipeline_prepare();
 
 float speed = 0.6;
 
@@ -26,6 +31,34 @@ pixel a{ 0, 0, RGBA(255, 0, 0, 255) };
 pixel b{ 0, 800, RGBA(0, 255, 0, 255) };
 pixel c{ 800, 800, RGBA(0, 0, 255, 255) };
 pixel d{ 800, 0, RGBA(0, 0, 255, 255) };
+
+
+
+
+uint32_t WIDTH = 800;
+uint32_t HEIGHT = 600;
+
+uint32_t positionVbo = 0;
+uint32_t colorVbo = 0;
+uint32_t uvVbo = 0;
+
+// indices
+uint32_t ebo = 0;
+uint32_t vao = 0;
+
+defaultShader* shader = nullptr;
+
+// MVP transformation matrix
+mat4f modelMatrix;
+mat4f viewMatrix;
+mat4f perspectiveMatrix;
+
+float angle = 0.0f;
+
+void transform() {
+    angle += 0.01f;
+    modelMatrix = Math::rotate(mat4f(1.0f), angle, vec3f{ 0.0f,1.0f,0.0f });
+}
 
 void render();
 void renderRotatingTriangleExperiment();
@@ -47,62 +80,21 @@ int APIENTRY wWinMain(
 
     sgl->initSurface(app->getWidth(), app->getHeight(), app->getCanvas());
 
-    prepare_wrap();
+    // render_test_stateMachine();
+
+    render_test_pipeline_prepare();
+
+    //prepare_wrap();
 
     while (alive) {
         alive = app->peekMessage();
-        renderRotatingTriangleExperiment();
+        render();
         app->show();
     }
     return 0;
 }
 
-void render() {
-    sgl->clear();
 
-    int r = 150;
-
-
-
-    a.uv = auv;
-    b.uv = buv;
-    c.uv = cuv;
-    d.uv = duv;
-
-    change_uv(auv);
-    change_uv(buv);
-    change_uv(cuv);
-    change_uv(duv);
-
-    sgl->setTexture(img1);
-    // sgl->setTexture(nullptr);
-
-    sgl->drawTriangle(a, b, c);
-    sgl->drawTriangle(a, c, d);
-
-
-    // sgl->drawImage(*img1, 50, 50);
-    // sgl->drawImageAlpha(*img1, 40, 50, 255);
-
-    //for (float i = 0; i < 360; i += 10)
-    //{
-    //    float radian = DEG2RAD(i);
-    //    int x = r * sin(radian) + c.x;
-    //    int y = r * cos(radian) + c.y;
-
-    //    pixel pt{ x, y, RGBA(rand() % 255, rand() % 255, rand() % 255, 255) };
-
-    //    sgl->drawLine(c, pt);
-    //}
-
-    //for (uint32_t i = 0; i < app->getWidth(); ++i) {
-    //    for (uint32_t j = 0; j < app->getHeight(); ++j) {
-    //        uint32_t v = std::rand() % 255;
-    //        RGBA color(v, v, v, v);
-    //        sgl->drawPoint(i, j, color);
-    //    }
-    //}
-}
 
 void change_uv(vec2f& uv) {
     uv.x += speed;
@@ -176,4 +168,131 @@ void renderRotatingTriangleExperiment() {
     if (angle >= 2.0f * PI) {
         angle -= static_cast<float>(2.0 * PI);
     }
+}
+
+
+void render_test_stateMachine() {
+    uint32_t positionVbo = 0;
+    uint32_t colorVbo = 0;
+    uint32_t uvVbo = 0;
+
+    uint32_t ebo = 0;
+
+    uint32_t vao = 0;
+
+    float positions[] = {
+    -0.5f, -0.5f, 0.0f,
+    -0.5f,  0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+    };
+
+    float colors[] = {
+        1.0f, 0.0f, 0.0f, 1.0f,
+        0.0f, 1.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f, 1.0f,
+    };
+
+    float uvs[] = {
+        0.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+    };
+
+    uint32_t indices[] = { 0, 1, 2 };
+    // generate ebo according to indices
+    ebo = sgl->genBuffer();
+    sgl->bindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+    sgl->bufferData(ELEMENT_ARRAY_BUFFER, 3 * sizeof(uint32_t), indices);
+    sgl->bindBuffer(ELEMENT_ARRAY_BUFFER, 0);
+
+    // generate vao
+    vao = sgl->genVertexArray();
+    sgl->bindVertexArray(vao);
+
+    positionVbo = sgl->genBuffer();
+    sgl->bindBuffer(ARRAY_BUFFER, positionVbo);
+    sgl->bufferData(ARRAY_BUFFER, sizeof(float) * 9, positions);
+    sgl->vertexAttributePointer(0, 4, 4 * sizeof(uint32_t), 0);
+
+    colorVbo = sgl->genBuffer();
+    sgl->bindBuffer(ARRAY_BUFFER, colorVbo);
+    sgl->bufferData(ARRAY_BUFFER, sizeof(float) * 9, colors);
+    sgl->vertexAttributePointer(1, 3, 3 * sizeof(uint32_t), 0);
+
+    uvVbo = sgl->genBuffer();
+    sgl->bindBuffer(ARRAY_BUFFER, uvVbo);
+    sgl->bufferData(ARRAY_BUFFER, sizeof(float) * 6, uvs);
+    sgl->vertexAttributePointer(2, 2, 2 * sizeof(uint32_t), 0);
+
+    sgl->bindBuffer(ARRAY_BUFFER, 0);
+    sgl->bindVertexArray(0);
+
+}
+
+void render() {
+    transform();
+    shader->mModelMatrix = modelMatrix;
+    shader->mViewMatrix = viewMatrix;
+    shader->mProjectionMatrix = perspectiveMatrix;
+
+    sgl->clear();
+    sgl->useProgram(shader);
+    sgl->bindVertexArray(vao);
+    sgl->bindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+    sgl->drawElement(DRAW_TRIANGLES, 0, 3);
+}
+
+void render_test_pipeline_prepare() {
+    shader = new defaultShader();
+
+    perspectiveMatrix = Math::perspective(60.0f, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+
+    auto cameraModelMatrix = Math::translate(mat4f(1.0f), vec3f{ 0.0f,0.0f,3.0f });
+    viewMatrix = Math::inverse(cameraModelMatrix);
+
+    float positions[] = {
+        -0.5f,-0.5f,0.0f,
+        -0.5f,0.5f,0.0f,
+        0.5f,-0.5f,0.0f
+    };
+
+    float colors[] = {
+        1.0f,0.0f,0.0f,1.0f,
+        0.0f,1.0f,0.0f,1.0f,
+        0.0f,0.0f,1.0f,1.0f
+    };
+
+    float uv[] = {
+        0.0f,0.0f,
+        0.0f,1.0f,
+        1.0f,0.0f
+    };
+
+    uint32_t indices[] = {0,1,2};
+
+    ebo = sgl->genBuffer();
+    sgl->bindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+    sgl->bufferData(ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 3, indices);
+    sgl->bindBuffer(ELEMENT_ARRAY_BUFFER, 0);
+
+    vao = sgl->genVertexArray();
+    sgl->bindVertexArray(vao);
+
+    auto positionVbo = sgl->genBuffer();
+    sgl->bindBuffer(ARRAY_BUFFER, positionVbo);
+    sgl->bufferData(ARRAY_BUFFER, sizeof(float) * 9, positions);
+    sgl->vertexAttributePointer(0, 3, 3 * sizeof(float), 0);
+
+    auto colorVbo = sgl->genBuffer();
+    sgl->bindBuffer(ARRAY_BUFFER, colorVbo);
+    sgl->bufferData(ARRAY_BUFFER, sizeof(float) * 12, colors);
+    sgl->vertexAttributePointer(1, 4, 4 * sizeof(float), 0);
+
+    auto uvVbo = sgl->genBuffer();
+    sgl->bindBuffer(ARRAY_BUFFER, uvVbo);
+    sgl->bufferData(ARRAY_BUFFER, sizeof(float) * 6, uv);
+    sgl->vertexAttributePointer(2, 2, 2 * sizeof(float), 0);
+
+    sgl->bindBuffer(ARRAY_BUFFER, 0);
+    sgl->bindVertexArray(0);
 }

@@ -3,7 +3,7 @@
 #include "math.h"
 
 // structure of VAO desctiption
-struct BindingDestcription {
+struct BindingDescription {
 	int mVBOid{ 0 };
 	size_t mItemSize{ 0 };
 	size_t mStride{ 0 };
