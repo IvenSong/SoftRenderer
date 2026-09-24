@@ -1,6 +1,7 @@
 #include "clipper.h"
 
-void Clipper::doClipSpace(const int& drawMode, const std::vector<VsOutput>& primitives, std::vector<VsOutput>& outputs)
+void Clipper::doClipSpace(const int& drawMode, const std::vector<VsOutput>& primitives,
+	std::vector<VsOutput>& outputs, bool enableCullFace, uint32_t frontFace, uint32_t cullface)
 {
 	if (drawMode == DRAW_TRIANGLES) {
 		std::vector<VsOutput> primitive;
@@ -21,6 +22,10 @@ void Clipper::doClipSpace(const int& drawMode, const std::vector<VsOutput>& prim
 			}
 
 			for (size_t j = 1; j + 1 < result.size(); ++j) {
+				if (enableCullFace && cullFace(frontFace, cullface, result[0], result[j], result[j + 1])) {
+					continue;
+				}
+
 				outputs.push_back(result[0]);
 				outputs.push_back(result[j]);
 				outputs.push_back(result[j + 1]);
@@ -45,6 +50,31 @@ void Clipper::doClipSpace(const int& drawMode, const std::vector<VsOutput>& prim
 			outputs.push_back(result[1]);
 		}
 	}
+}
+
+bool Clipper::cullFace(const uint32_t& frontFace, const uint32_t& cullface, const VsOutput& v0, const VsOutput& v1, const VsOutput& v2)
+{
+	// Face winding is defined after the perspective divide, with y pointing up.
+	const auto& p0 = v0.mPosition;
+	const auto& p1 = v1.mPosition;
+	const auto& p2 = v2.mPosition;
+	if (p0.w <= 0.0f || p1.w <= 0.0f || p2.w <= 0.0f) {
+		return true;
+	}
+
+	const double x0 = static_cast<double>(p0.x) / p0.w;
+	const double y0 = static_cast<double>(p0.y) / p0.w;
+	const double x1 = static_cast<double>(p1.x) / p1.w;
+	const double y1 = static_cast<double>(p1.y) / p1.w;
+	const double x2 = static_cast<double>(p2.x) / p2.w;
+	const double y2 = static_cast<double>(p2.y) / p2.w;
+	const double signedArea = (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+	if (!std::isfinite(signedArea) || signedArea == 0.0) {
+		return true;
+	}
+
+	const bool isFront = frontFace == FRONT_FACE_CCW ? signedArea > 0.0 : signedArea < 0.0;
+	return cullface == FRONT_FACE ? isFront : !isFront;
 }
 
 void Clipper::sutherlandHodgman(const int& drawMode, const std::vector<VsOutput>&primitive, std::vector<VsOutput>&outputs) {

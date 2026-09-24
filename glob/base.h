@@ -17,6 +17,17 @@
 #define TEXTURE_WRAP_REPEAT 0
 #define TEXTURE_WRAP_MIRROR 1
 
+#define ARRAY_BUFFER 0
+#define ELEMENT_ARRAY_BUFFER 1 // EBO
+
+#define FRONT_FACE 0
+#define BACK_FACE 1
+#define FRONT_FACE_CW 0
+#define FRONT_FACE_CCW 1
+
+#define CULL_FACE 0
+
+
 using byte = unsigned char;
 
 struct RGBA {

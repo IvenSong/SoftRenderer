@@ -277,12 +277,27 @@ void GPU::drawElement(const uint32_t& drawMode, const uint32_t& first, const uin
 
 	// Clip in homogeneous coordinates before perspective division.
 	std::vector<VsOutput> clipOutputs;
-	Clipper::doClipSpace(drawMode, vsOutputs, clipOutputs);
+	Clipper::doClipSpace(drawMode, vsOutputs, clipOutputs,
+		mEnableCullFace, mFrontFace, mCullFace);
 	if (clipOutputs.empty()) return;
 
 	/* NDC Process: convert vertex into NDC*/
 	for (auto& output : clipOutputs) {
 		perspectiveDivision(output);
+	}
+
+	// Back Face Cull Process
+	std::vector<VsOutput> cullOutputs = clipOutputs;
+	if (drawMode == DRAW_TRIANGLES && mEnableCullFace) {
+		cullOutputs.clear();
+		for (int i = 0; i < clipOutputs.size() - 2; i += 3) {
+			if (Clipper::cullFace(mFrontFace, mCullFace, clipOutputs[i], clipOutputs[i + 1], clipOutputs[i + 2])) {
+				auto start = clipOutputs.begin() + i;
+				auto end = clipOutputs.begin() + i + 3;
+				cullOutputs.insert(cullOutputs.end(), start, end);
+
+			}
+		}
 	}
 
 	/*Screen Mapping*/

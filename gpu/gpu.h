@@ -92,7 +92,16 @@ public:
 	void useProgram(Shader* shader);
 
 	void drawElement(const uint32_t& drawMode, const uint32_t& first, const uint32_t& count);
-	// 
+	
+	void enable(const uint32_t& value);
+
+	void disable(const uint32_t& value);
+
+	// cull face
+	void frontFace(const uint32_t& value);
+
+	void cullFace(const uint32_t& value);
+
 	 
 private:
 	void vertexShaderStage(
@@ -127,6 +136,11 @@ private:
 	Shader* mShader{ nullptr };
 	mat4f mScreenMatrix; // get assigned when we do initSurface function
 
+	// Cull face
+	bool mEnableCullFace{ true };
+	uint32_t mFrontFace{ FRONT_FACE_CCW };
+	uint32_t mCullFace{ BACK_FACE };
+
 
 	// Original GPU Simulation (can be discarded)
 
@@ -143,5 +157,3 @@ private:
 
 
 
-#define ARRAY_BUFFER 0
-#define ELEMENT_ARRAY_BUFFER 1 // EBO
