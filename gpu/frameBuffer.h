@@ -3,7 +3,7 @@
 
 /*
 * class FrameBuffer：
-* 存储当前画布对应的bmp的内存指针，作为当前绘图画板
+* store the bmp memory pointer
 */
 class FrameBuffer {
 public:

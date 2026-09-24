@@ -16,7 +16,7 @@ void render_test_stateMachine();
 
 void render_test_pipeline_prepare();
 
-float speed = 0.6;
+float speed = 0.1;
 
 void change_uv(vec2f& uv);
 
@@ -56,7 +56,7 @@ mat4f perspectiveMatrix;
 float angle = 0.0f;
 
 void transform() {
-    angle += 0.01f;
+    angle += 0.01f * speed;
     modelMatrix = Math::rotate(mat4f(1.0f), angle, vec3f{ 0.0f,1.0f,0.0f });
 }
 

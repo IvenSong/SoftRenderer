@@ -11,6 +11,7 @@ struct BindingDescription {
 };
 
 struct VsOutput {
+	float mOneOverW{ 0.0f }; // 1 / omega
 	vec4f mPosition{ 0.0f,0.0f,0.0f,1.0f };
 	vec4f mColor; // from 0.0 to 1.0
 	vec2f mUV;

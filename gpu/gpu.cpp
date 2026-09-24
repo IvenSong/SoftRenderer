@@ -275,22 +275,34 @@ void GPU::drawElement(const uint32_t& drawMode, const uint32_t& first, const uin
 
 	if (vsOutputs.empty()) return;
 
+	// Clip in homogeneous coordinates before perspective division.
+	std::vector<VsOutput> clipOutputs;
+	Clipper::doClipSpace(drawMode, vsOutputs, clipOutputs);
+	if (clipOutputs.empty()) return;
+
 	/* NDC Process: convert vertex into NDC*/
-	for (auto& output : vsOutputs) {
+	for (auto& output : clipOutputs) {
 		perspectiveDivision(output);
 	}
 
 	/*Screen Mapping*/
 
-	for (auto& output : vsOutputs) {
+	for (auto& output : clipOutputs) {
 		screenMapping(output);
 	}
 
 	/* Rasterization */
 	std::vector<VsOutput> rasterOutputs;
-	raster::rasterize(rasterOutputs, drawMode, vsOutputs);
+	raster::rasterize(rasterOutputs, drawMode, clipOutputs);
 
 	if (rasterOutputs.empty()) return;
+
+	// Perspective Recover Process
+
+	for (auto& output : rasterOutputs) {
+		perspectiveRecover(output);
+	}
+
 
 	/* Color Output Process*/
 
@@ -322,11 +334,45 @@ void GPU::perspectiveDivision(VsOutput& vsOutput)
 {
 	float oneOverW = 1.0f / vsOutput.mPosition.w;
 
+	vsOutput.mOneOverW = oneOverW;
 	vsOutput.mPosition *= oneOverW;
 	vsOutput.mPosition.w = 1.0f;
+
+	vsOutput.mColor *= vsOutput.mOneOverW;
+	vsOutput.mUV *= vsOutput.mOneOverW;
+
+	trim(vsOutput);
 }
 
 void GPU::screenMapping(VsOutput& vsOutput)
 {
 	vsOutput.mPosition = mScreenMatrix * vsOutput.mPosition;
+}
+
+void GPU::perspectiveRecover(VsOutput& vsOutput)
+{
+	vsOutput.mColor /= vsOutput.mOneOverW;
+	vsOutput.mUV /= vsOutput.mOneOverW;
+}
+
+void GPU::trim(VsOutput& vsOutput) {
+	if (vsOutput.mPosition.x < -1.0f) {
+		vsOutput.mPosition.x = -1.0f;
+	}
+	else if (vsOutput.mPosition.x > 1.0f) {
+		vsOutput.mPosition.x = 1.0f;
+	}
+	if (vsOutput.mPosition.y < -1.0f) {
+		vsOutput.mPosition.y = -1.0f;
+	}
+	else if (vsOutput.mPosition.y > 1.0f) {
+		vsOutput.mPosition.y = 1.0f;
+	}
+	if (vsOutput.mPosition.y < -1.0f) {
+		vsOutput.mPosition.y = -1.0f;
+	}
+	else if (vsOutput.mPosition.z > 1.0f) {
+		vsOutput.mPosition.z = 1.0f;
+	}
+
 }

@@ -4,6 +4,34 @@
 
 
 namespace Math {
+	// t = 0 returns v0, t = 1 returns v1; values outside [0, 1] extrapolate.
+	template <typename E>
+	E lerp(E v0, E v1, float t) {
+		return static_cast<E>(v0 + (v1 - v0) * t);
+	}
+
+	// Weighted interpolation of three scalar values.
+	inline float lerp(float v0, float v1, float v2,
+		float weight0, float weight1, float weight2) {
+		return v0 * weight0 + v1 * weight1 + v2 * weight2;
+	}
+
+	template <typename E>
+	vector2<E> lerp(const vector2<E>& v0, const vector2<E>& v1, float t) {
+		return vector2<E>(lerp(v0.x, v1.x, t), lerp(v0.y, v1.y, t));
+	}
+
+	template <typename E>
+	vector3<E> lerp(const vector3<E>& v0, const vector3<E>& v1, float t) {
+		return vector3<E>(lerp(v0.x, v1.x, t), lerp(v0.y, v1.y, t), lerp(v0.z, v1.z, t));
+	}
+
+	template <typename E>
+	vector4<E> lerp(const vector4<E>& v0, const vector4<E>& v1, float t) {
+		return vector4<E>(lerp(v0.x, v1.x, t), lerp(v0.y, v1.y, t),
+			lerp(v0.z, v1.z, t), lerp(v0.w, v1.w, t));
+	}
+
 	template <typename E>
 	E cross(const vector2<E>& v1, const vector2<E>& v2) {
 		return v1.x * v2.y - v1.y * v2.x;

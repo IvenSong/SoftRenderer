@@ -9,6 +9,7 @@
 #include "VAO.h"
 #include "BufferObject.h"
 #include "shader.h"
+#include "clipper.h"
 
 #define sgl GPU::getInstance()
 
@@ -104,6 +105,9 @@ private:
 
 	void perspectiveDivision(VsOutput& vsOutput); // for dividing omega (depth)
 	void screenMapping(VsOutput& vsOutput); // NDC coordinate to Screen coordinate
+	void perspectiveRecover(VsOutput& vsOutput);
+
+	void trim(VsOutput& vsOutput);
 
 private:
 	static GPU* mInstance;
