@@ -10,6 +10,7 @@
 #include "BufferObject.h"
 #include "shader.h"
 #include "clipper.h"
+#include "texture.h"
 
 #define sgl GPU::getInstance()
 
@@ -91,6 +92,8 @@ public:
 
 	void useProgram(Shader* shader);
 
+
+
 	void drawElement(const uint32_t& drawMode, const uint32_t& first, const uint32_t& count);
 	
 	void enable(const uint32_t& value);
@@ -99,8 +102,18 @@ public:
 
 	// cull face
 	void frontFace(const uint32_t& value);
-
 	void cullFace(const uint32_t& value);
+
+	// Depth Test
+	bool depthTest(const FsOutput& output);
+	void depthFunc(const uint32_t depthFunc);
+
+	// texture
+	uint32_t genTexture();
+	void deleteTexture(const uint32_t& texID);
+	void bindTexture(const uint32_t& texID);
+	void texImage2D(const uint32_t& width, const uint32_t& height, void* data);
+	void texParameter(const uint32_t& param, const uint32_t& value);
 
 	 
 private:
@@ -112,14 +125,19 @@ private:
 		const uint32_t count
 	);
 
+// Drawing Functions
+
 	void perspectiveDivision(VsOutput& vsOutput); // for dividing omega (depth)
 	void screenMapping(VsOutput& vsOutput); // NDC coordinate to Screen coordinate
 	void perspectiveRecover(VsOutput& vsOutput);
 
 	void trim(VsOutput& vsOutput);
 
+
+
+	RGBA blend(const FsOutput& output);
+
 private:
-	static GPU* mInstance;
 	FrameBuffer* mFrameBuffer{ nullptr };
 
 	// VBO related and EBO
@@ -141,6 +159,19 @@ private:
 	uint32_t mFrontFace{ FRONT_FACE_CCW };
 	uint32_t mCullFace{ BACK_FACE };
 
+	// Depth Test
+	bool mEnableDepthTest{ true };
+	uint32_t mDepthFunc{ DEPTH_LESS };
+
+
+	// Blending
+	bool mEnableBlending{ false };
+
+	// Texturfe
+	uint32_t mCurrentTexture{ 0 };
+	uint32_t mTextureCounter{ 0 };
+	std::map<uint32_t, Texture*> mTextureMap;
+ 
 
 	// Original GPU Simulation (can be discarded)
 

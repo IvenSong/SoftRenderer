@@ -1,12 +1,8 @@
 #include "gpu.h"
 
-GPU* GPU::mInstance = nullptr;
 GPU* GPU::getInstance() {
-	if (!mInstance) {
-		mInstance = new GPU();
-	}
-
-	return mInstance;
+	static GPU instance;
+	return &instance;
 }
 
 GPU::GPU() {}
@@ -14,6 +10,9 @@ GPU::GPU() {}
 GPU::~GPU() {
 	if (mFrameBuffer) {
 		delete mFrameBuffer;
+	}
+	for (auto& texture : mTextureMap) {
+		delete texture.second;
 	}
 }
 
@@ -160,6 +159,7 @@ vec2f GPU::checkWrap(const vec2f& UV) {
 
 
 
+
 uint32_t GPU::genBuffer() {
 	const uint32_t bufferID = ++mBufferCounter;
 
@@ -236,6 +236,64 @@ void GPU::useProgram(Shader* shader)
 	mShader = shader;
 }
 
+void GPU::depthFunc(const uint32_t depthFunc)
+{
+	mDepthFunc = depthFunc;
+}
+
+uint32_t GPU::genTexture()
+{
+	mTextureCounter++;
+	mTextureMap.insert(std::make_pair(mTextureCounter, new Texture()));
+
+	return mTextureCounter;
+}
+
+void GPU::deleteTexture(const uint32_t& texID)
+{
+	auto iter = mTextureMap.find(texID);
+	if (iter == mTextureMap.end()) {
+		return;
+	}
+	else {
+		delete iter->second;
+	}
+
+	mTextureMap.erase(texID);
+}
+
+void GPU::bindTexture(const uint32_t& texID) {
+	mCurrentTexture = texID;
+}
+
+void GPU::texImage2D(const uint32_t& width, const uint32_t& height, void* data)
+{
+	if (!mCurrentTexture) {
+		return;
+	}
+
+	auto iter = mTextureMap.find(mCurrentTexture);
+	if (iter == mTextureMap.end()) {
+		return;
+	}
+	auto texture = iter->second;
+	texture->setBufferData(width, height, data);
+}
+
+void GPU::texParameter(const uint32_t& param, const uint32_t& value)
+{
+	if (!mCurrentTexture) {
+		return;
+	}
+
+	auto iter = mTextureMap.find(mCurrentTexture);
+	if (iter == mTextureMap.end()) {
+		return;
+	}
+	auto texture = iter->second;
+	texture->setParameter(param, value);
+}
+
 /*
 drawMode: primitive drawing mode, such as triangles or lines
 first:    index of the first vertex/index to process
@@ -286,20 +344,6 @@ void GPU::drawElement(const uint32_t& drawMode, const uint32_t& first, const uin
 		perspectiveDivision(output);
 	}
 
-	// Back Face Cull Process
-	std::vector<VsOutput> cullOutputs = clipOutputs;
-	if (drawMode == DRAW_TRIANGLES && mEnableCullFace) {
-		cullOutputs.clear();
-		for (int i = 0; i < clipOutputs.size() - 2; i += 3) {
-			if (Clipper::cullFace(mFrontFace, mCullFace, clipOutputs[i], clipOutputs[i + 1], clipOutputs[i + 2])) {
-				auto start = clipOutputs.begin() + i;
-				auto end = clipOutputs.begin() + i + 3;
-				cullOutputs.insert(cullOutputs.end(), start, end);
-
-			}
-		}
-	}
-
 	/*Screen Mapping*/
 
 	for (auto& output : clipOutputs) {
@@ -324,8 +368,14 @@ void GPU::drawElement(const uint32_t& drawMode, const uint32_t& first, const uin
 	FsOutput fsOutput;
 	uint32_t pixelPos = 0;
 	for (uint32_t i = 0; i < rasterOutputs.size(); ++i) {
-		mShader->fragmentShader(rasterOutputs[i], fsOutput);
+		mShader->fragmentShader(rasterOutputs[i], fsOutput, mTextureMap);
 		pixelPos = fsOutput.mPixelPos.y * mFrameBuffer->getWidth() + fsOutput.mPixelPos.x;
+
+		// depth test
+		if (mEnableDepthTest && !depthTest(fsOutput)) {
+			continue;
+		}
+
 		mFrameBuffer->mColorBuffer[pixelPos] = fsOutput.mColor;
 	}
 }
@@ -340,6 +390,9 @@ void GPU::enable(const uint32_t& value)
 	case DEPTH_TEST:
 		mEnableDepthTest = true;
 		break;
+
+	case BLENDING:
+		mEnableBlending = true;
 	default:
 		break;
 	}
@@ -355,6 +408,9 @@ void GPU::disable(const uint32_t& value)
 	case DEPTH_TEST:
 		mEnableDepthTest = false;
 		break;
+
+	case BLENDING:
+		mEnableBlending = false;
 	default:
 		break;
 	}
@@ -431,4 +487,50 @@ void GPU::trim(VsOutput& vsOutput) {
 		vsOutput.mPosition.z = 1.0f;
 	}
 
+}
+
+bool GPU::depthTest(const FsOutput& output)
+{
+	uint32_t pixelPos = output.mPixelPos.y * mFrameBuffer->mWidth + output.mPixelPos.x;
+	float oldDepth = mFrameBuffer->mDepthBuffer[pixelPos];
+
+	switch(mDepthFunc) {
+	case DEPTH_LESS:
+		if (output.mDepth < oldDepth) {
+			mFrameBuffer->mDepthBuffer[pixelPos] = output.mDepth;
+			return true;
+		}
+		else {
+			return false;
+		}
+		break;
+	case DEPTH_GREATER:
+		if (output.mDepth > oldDepth) {
+			mFrameBuffer->mDepthBuffer[pixelPos] = output.mDepth;
+			return true;
+		}
+		else {
+			return false;
+		}
+		break;
+	default:
+		return false;
+	}
+}
+
+RGBA GPU::blend(const FsOutput& output)
+{
+	RGBA result;
+
+	uint32_t pixelPos = output.mPixelPos.y * mFrameBuffer->mWidth + output.mPixelPos.x;
+	RGBA dst = mFrameBuffer->mColorBuffer[pixelPos];
+	RGBA src = output.mColor;
+
+	float weight = static_cast<float>(src.mA) / 255.0f;
+
+	result.mR = static_cast<float>(src.mR) * weight + static_cast<float>(dst.mR) * (1.0 - weight);
+	result.mG = static_cast<float>(src.mG) * weight + static_cast<float>(dst.mG) * (1.0 - weight);
+	result.mB = static_cast<float>(src.mB) * weight + static_cast<float>(dst.mB) * (1.0 - weight);
+	result.mA = static_cast<float>(src.mA) * weight + static_cast<float>(dst.mA) * (1.0 - weight);
+	return result;
 }

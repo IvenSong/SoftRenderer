@@ -1,5 +1,6 @@
 #pragma once
 #include "base.h"
+#include "inputHandler.h"
 #include<Windows.h>
 
 #define app Application::getInstance()
@@ -18,6 +19,7 @@ public:
 	bool peekMessage();
 
 	void show();
+	void setInputHandler(InputHandler* handler) { mInputHandler = handler; }
 
 	uint32_t getWidth() const { return mWidth; }
 	uint32_t getHeight() const { return mHeight; }
@@ -28,14 +30,13 @@ private:
 	ATOM registerWindowClass(HINSTANCE hInstance);
 
 private:
-	static Application* mInstance;
-
+	InputHandler* mInputHandler{ nullptr };
 
 	bool		mAlive{ true };
 
-	HINSTANCE	mWindowInst;
+	HINSTANCE	mWindowInst{ nullptr };
 	WCHAR		mWindowClassName[100] = L"AppWindow";
-	HWND		mHwnd;
+	HWND		mHwnd{ nullptr };
 
 	int			mWidth = 800;
 	int			mHeight = 600;

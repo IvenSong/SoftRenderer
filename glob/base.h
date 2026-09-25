@@ -26,7 +26,28 @@
 #define FRONT_FACE_CCW 1
 
 #define CULL_FACE 0
+#define DEPTH_TEST 1
+#define BLENDING 2
 
+#define DEPTH_LESS 0
+#define DEPTH_GREATER 1
+
+#define TEXTURE_FILTER 0
+#define TEXTURE_WRAP_U 1
+#define TEXTURE_WRAP_V 2
+
+#define TEXTURE_FILTER_NEAREST 0
+#define TEXTURE_FILTER_LINEAR 1
+
+#define TEXTURE_WRAP_REPEAT 0
+#define TEXTURE_WRAP_MIRROR 1
+
+
+// Key board code
+#define KEY_W 0x57
+#define KEY_A 0x41
+#define KEY_S 0x53
+#define KEY_D 0x44
 
 using byte = unsigned char;
 

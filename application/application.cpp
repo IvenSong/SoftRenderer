@@ -1,12 +1,9 @@
 #include"application.h"
+#include <windowsx.h>
 
-Application* Application::mInstance = nullptr;
-Application* Application::getInstance() {   
-	if (mInstance == nullptr) {
-		mInstance = new Application();
-	}
-
-	return mInstance;
+Application* Application::getInstance() {
+	static Application instance;
+	return &instance;
 }
 
 Application::Application() {}
@@ -113,7 +110,7 @@ ATOM Application::registerWindowClass(HINSTANCE hInstance)
 	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);// windows backgroud color
 	wndClass.lpszMenuName = NULL;
 	wndClass.lpszClassName = mWindowClassName;// windows class name
-	wndClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);//窗口标题图标
+	wndClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO); // header of windows
 
 	return RegisterClassExW(&wndClass);
 }
@@ -122,13 +119,6 @@ BOOL Application::createWindow(HINSTANCE hInstance)
 {
 	mWindowInst = hInstance;
 
-	/*
-	* WS_POPUP:不需要标题栏，则不需要边框
-	* WS_OVERLAPPEDWINDOW：拥有普通程序主窗口的所有特点，必须有标题且有边框
-	*
-	* WS_CLIPSIBLINGS:被兄弟窗口挡住区域不绘制
-	* WS_CLIPCHILDREN:被子窗口遮挡住的区域不绘制
-	*/
 
 	auto dwExStyle = WS_EX_APPWINDOW;
 	auto dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
@@ -179,6 +169,44 @@ bool Application::peekMessage() {
 void Application::handleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message)
 	{
+	case WM_KEYDOWN: {
+		if (mInputHandler) {
+			const uint32_t key = static_cast<uint32_t>(wParam);
+			mInputHandler->onKeyDown(key);
+		}
+		break;
+	}
+	case WM_KEYUP: {
+		if (mInputHandler) {
+			const uint32_t key = static_cast<uint32_t>(wParam);
+			mInputHandler->onKeyUp(key);
+		}
+		break;
+	}
+	case WM_RBUTTONDOWN: {
+		if (mInputHandler) {
+			const int x = GET_X_LPARAM(lParam);
+			const int y = GET_Y_LPARAM(lParam);
+			mInputHandler->onRMouseDown(x, y);
+		}
+		break;
+	}
+	case WM_RBUTTONUP: {
+		if (mInputHandler) {
+			const int x = GET_X_LPARAM(lParam);
+			const int y = GET_Y_LPARAM(lParam);
+			mInputHandler->onRMouseUp(x, y);
+		}
+		break;
+	}
+	case WM_MOUSEMOVE: {
+		if (mInputHandler) {
+			const int x = GET_X_LPARAM(lParam);
+			const int y = GET_Y_LPARAM(lParam);
+			mInputHandler->onMouseMove(x, y);
+		}
+		break;
+	}
 	case WM_CLOSE: {
 		DestroyWindow(hWnd);
 		break;
@@ -191,6 +219,10 @@ void Application::handleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	}
 	break;
 	case WM_DESTROY: {
+		if (mhDC) {
+			ReleaseDC(hWnd, mhDC);
+			mhDC = nullptr;
+		}
 		PostQuitMessage(0);
 		mAlive = false;
 		break;

@@ -1,11 +1,10 @@
 #pragma once
-#include "shader.h"
+#include "Shader.h"
 
-
-class defaultShader:public Shader {
+class TextureShader : public Shader {
 public:
-	defaultShader() {};
-	~defaultShader() {};
+	TextureShader();
+	~TextureShader();
 
 	VsOutput vertexShader(
 		// bindingMap in VAO
@@ -16,12 +15,13 @@ public:
 		const uint32_t& index
 	) override;
 
-	void fragmentShader(const VsOutput& input, FsOutput& output,
-		const std::map<uint32_t, Texture*>& textures) override;
+	void fragmentShader(const VsOutput& input, FsOutput& output, const std::map<uint32_t, Texture*>& textures);
+
 public:
-	//uniform matrices
+	// uniforms
 	mat4f mModelMatrix;
 	mat4f mViewMatrix;
 	mat4f mProjectionMatrix;
 
+	uint32_t mDiffuseTexture{ 0 };
 };
