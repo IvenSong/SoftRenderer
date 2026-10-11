@@ -4,7 +4,7 @@ A C++17 software rasterizer that implements a 3D rendering pipeline on the CPU. 
 
 ![Textured house rendered by SoftRenderer](docs/images/blender-house.png)
 
-The current demo loads a textured house exported from Blender as an OBJ. Its 28 triangles and 512 × 512 texture atlas exercise model import, UV interpolation, texture sampling, and depth testing. The scene uses full ambient illumination so that texture placement can be compared directly with a Blender reference.
+The current demo loads a textured house exported from Blender as an OBJ. Its 28 triangles and 512 × 512 texture atlas exercise model import, UV interpolation, texture sampling, and depth testing. The scene uses full ambient illumination to show the texture atlas without directional-light variation.
 
 ## Graphics pipeline
 
@@ -22,11 +22,9 @@ Indexed vertices → vertex shader / MVP transform → homogeneous clipping
 
 The implementation is organized around [pipeline orchestration](gpu/gpu.cpp), [clipping](gpu/clipper.cpp), [rasterization](gpu/raster.cpp), [texture sampling](gpu/texture.cpp), [lighting](gpu/Shader/lightShader.cpp), and [model import](application/model.cpp). The [math module](Math/MathLib.h) provides vector, matrix, projection, and camera-transform operations.
 
-## Visual validation
+## Validation
 
-![Blender reference beside the SoftRenderer output](docs/images/blender-comparison.png)
-
-The left image is the Blender reference; the right is the CPU framebuffer. An offscreen comparison exposed a UV orientation mismatch during OBJ import. Removing the extra UV flip reduced RGB mean absolute error from **88.2225 to 4.8126** on pixels classified as foreground in both 640 × 480 images (channel range 0–255). This is a diagnostic result for this scene, not a general renderer accuracy score. The comparison script, source assets, and reproduction details are in the [Blender house experiment](experiments/blender_house.md).
+The offscreen model-import experiment renders the same house scene used by the windowed application and checks that both meshes, their UVs and textures, and the framebuffer output are present. A [side-by-side image](docs/images/blender-comparison.png) shows the CPU output against a Blender reference. The detailed comparison and reproduction steps are in the [Blender house experiment](experiments/blender_house.md).
 
 A separate [cube-lighting experiment](experiments/README.md) checks directional lighting, normal transformation, depth reset, and repeated-frame behavior.
 
