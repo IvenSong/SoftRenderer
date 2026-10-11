@@ -192,7 +192,7 @@ namespace Math {
 		}
 
 		explicit operator vector3<E>() const {
-			return vector2<E>(x, y, z);
+			return vector3<E>(x, y, z);
 		}
 
 		vector4<E> operator+(const vector4<E>& v) const {

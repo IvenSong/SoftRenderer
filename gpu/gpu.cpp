@@ -452,6 +452,7 @@ void GPU::perspectiveDivision(VsOutput& vsOutput)
 
 	vsOutput.mColor *= vsOutput.mOneOverW;
 	vsOutput.mUV *= vsOutput.mOneOverW;
+	vsOutput.mNormal *= vsOutput.mOneOverW;
 
 	trim(vsOutput);
 }
@@ -465,6 +466,7 @@ void GPU::perspectiveRecover(VsOutput& vsOutput)
 {
 	vsOutput.mColor /= vsOutput.mOneOverW;
 	vsOutput.mUV /= vsOutput.mOneOverW;
+	vsOutput.mNormal /= vsOutput.mOneOverW;
 }
 
 void GPU::trim(VsOutput& vsOutput) {

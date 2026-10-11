@@ -33,6 +33,7 @@ public:
 	void onMouseMove(const int& x, const int& y) override;
 
 	void update();
+	void setPose(const vec3f& position, const vec3f& target);
 
 	mat4f getViewMatrix() const { return mViewMatrix; }
 

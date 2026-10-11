@@ -151,6 +151,7 @@ VsOutput Clipper::intersect(const VsOutput& last, const VsOutput& current, const
 	output.mPosition = Math::lerp(last.mPosition, current.mPosition, weight);
 	output.mColor = Math::lerp(last.mColor, current.mColor, weight);
 	output.mUV = Math::lerp(last.mUV, current.mUV, weight);
+	output.mNormal = Math::lerp(last.mNormal, current.mNormal, weight);
 
 
 	return output;

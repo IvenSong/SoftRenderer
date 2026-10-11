@@ -1,9 +1,8 @@
 #pragma once
 #include "base.h"
 #include "inputHandler.h"
+#include "model.h"
 #include<Windows.h>
-
-#define app Application::getInstance()
 
 class Application {
 public:

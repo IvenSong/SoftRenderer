@@ -1,4 +1,5 @@
 #include "image.h"
+#include "image.h"
 #define STB_IMAGE_IMPLEMENTATION // a requirement of using stb_image.h
 #include "stb_image.h"
 
@@ -43,4 +44,32 @@ void image::destroyImage(image* img) {
     if (img) {
         delete img;
     }
+}
+
+image* image::createImageFromMemory(const std::string& path, unsigned char* dataIn, uint32_t widthIn, uint32_t heightIn)
+{
+    int picType = 0;
+    int width{ 0 }, height{ 0 };
+
+    uint32_t dataInSize = 0;
+
+    // in some case that there is no height in a picture, the height might be zero, so the size of picture is the width
+    if (!heightIn) {
+        dataInSize = widthIn;
+    }
+    else {
+        dataInSize = widthIn * heightIn;
+    }
+
+    unsigned char* bits = stbi_load_from_memory(dataIn, dataInSize, &width, &height, &picType, STBI_rgb_alpha);
+
+    // convert into RGBA
+    for (unsigned int i = 0; i < width * height * 4; i += 4) {
+        byte tmp = bits[i];
+        bits[i] = bits[i + 2];
+        bits[i + 2] = tmp;
+    }
+
+    image* img = new image(width, height, (RGBA*)bits);
+    return img;
 }

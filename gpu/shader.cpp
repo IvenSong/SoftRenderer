@@ -31,3 +31,33 @@ Math::vector4<float> Shader::getVector(
 
 	return result;
 }
+
+template <>
+vec2f Shader::getVector<vec2f>(
+	const std::map<uint32_t, BindingDescription>& bindingMap,
+	const std::map<uint32_t, std::unique_ptr<BufferObject>>& bufferMap,
+	const uint32_t& attributeLocation,
+	const uint32_t& index)
+{
+	return static_cast<vec2f>(getVector(bindingMap, bufferMap, attributeLocation, index));
+}
+
+template <>
+vec3f Shader::getVector<vec3f>(
+	const std::map<uint32_t, BindingDescription>& bindingMap,
+	const std::map<uint32_t, std::unique_ptr<BufferObject>>& bufferMap,
+	const uint32_t& attributeLocation,
+	const uint32_t& index)
+{
+	return static_cast<vec3f>(getVector(bindingMap, bufferMap, attributeLocation, index));
+}
+
+template <>
+vec4f Shader::getVector<vec4f>(
+	const std::map<uint32_t, BindingDescription>& bindingMap,
+	const std::map<uint32_t, std::unique_ptr<BufferObject>>& bufferMap,
+	const uint32_t& attributeLocation,
+	const uint32_t& index)
+{
+	return getVector(bindingMap, bufferMap, attributeLocation, index);
+}

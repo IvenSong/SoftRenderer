@@ -35,6 +35,7 @@ void FrameBuffer::clear(const RGBA& color) {
 
 	std::size_t pixelSize = static_cast<std::size_t>(mWidth) * mHeight;
 	std::fill_n(mColorBuffer, pixelSize, color);
+	std::fill_n(mDepthBuffer, pixelSize, 1.0f);
 }
 
 void FrameBuffer::setPoint(int x, int y, const RGBA& color) {

@@ -11,6 +11,18 @@ Camera::~Camera()
 {
 }
 
+void Camera::setPose(const vec3f& position, const vec3f& target) {
+	const vec3f direction = target - position;
+	if (Math::lengthSQ(direction) <= 0.0f) {
+		return;
+	}
+	mPosition = position;
+	mFront = Math::normalize(direction);
+	mPitch = std::asin(std::clamp(mFront.y, -1.0f, 1.0f)) * 180.0f / static_cast<float>(PI);
+	mYaw = std::atan2(mFront.z, mFront.x) * 180.0f / static_cast<float>(PI);
+	mViewMatrix = Math::lookAt<float>(mPosition, target, mTop);
+}
+
 void Camera::onRMouseDown(const int& x, const int& y) {
 	mMouseMoving = true;
 	mCurrentMouseX = x;

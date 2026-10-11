@@ -7,24 +7,25 @@
 #pragma comment(linker, "/subsystem:console /entry:wWinMainCRTStartup")
 
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
-    if (!app->initApplication(hInstance, 800, 600)) {
+    auto* application = Application::getInstance();
+    if (!application->initApplication(hInstance, 800, 600)) {
         return -1;
     }
 
-    sgl->initSurface(app->getWidth(), app->getHeight(), app->getCanvas());
+    sgl->initSurface(application->getWidth(), application->getHeight(), application->getCanvas());
 
     PreparedScene scene;
-    if (!scene.initialize(app->getWidth(), app->getHeight())) {
+    if (!scene.initialize(application->getWidth(), application->getHeight())) {
         return -1;
     }
-    app->setInputHandler(scene.getCamera());
+    application->setInputHandler(scene.getCamera());
 
-    while (app->peekMessage()) {
+    while (application->peekMessage()) {
         scene.getCamera()->update();
         scene.render();
-        app->show();
+        application->show();
     }
-    app->setInputHandler(nullptr);
+    application->setInputHandler(nullptr);
 
     return 0;
 }

@@ -251,6 +251,7 @@
 		target.mOneOverW = Math::lerp(v0.mOneOverW, v1.mOneOverW, v2.mOneOverW, alpha, beta, gamma);
 
 		target.mUV = v0.mUV * alpha + v1.mUV * beta + v2.mUV * gamma;
+		target.mNormal = v0.mNormal * alpha + v1.mNormal * beta + v2.mNormal * gamma;
 		target.mColor = alpha * v0.mColor + beta * v1.mColor + gamma * v2.mColor;
 		target.mPosition.z = alpha * v0.mPosition.z + beta * v1.mPosition.z + gamma * v2.mPosition.z;
 		// target.mPosition.w = alpha * v0.mPosition.w + beta * v1.mPosition.w + gamma * v2.mPosition.w;
@@ -280,6 +281,7 @@
 		target.mPosition.w = raster::lerp(v0.mPosition.w, v1.mPosition.w, weight);
 		target.mColor = raster::lerp(v0.mColor, v1.mColor, weight);
 		target.mUV = raster::lerp(v0.mUV, v1.mUV, weight);
+		target.mNormal = raster::lerp(v0.mNormal, v1.mNormal, weight);
 }
 
 

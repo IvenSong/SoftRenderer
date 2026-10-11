@@ -13,4 +13,5 @@ public:
 
 	static image* createImage(std::string path);
 	static void destroyImage(image* image);
+	static image* createImageFromMemory(const std::string& path, unsigned char* dataIn, uint32_t widthIn, uint32_t heightIn);
 };
