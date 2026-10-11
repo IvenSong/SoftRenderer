@@ -22,12 +22,6 @@ Indexed vertices → vertex shader / MVP transform → homogeneous clipping
 
 The implementation is organized around [pipeline orchestration](gpu/gpu.cpp), [clipping](gpu/clipper.cpp), [rasterization](gpu/raster.cpp), [texture sampling](gpu/texture.cpp), [lighting](gpu/Shader/lightShader.cpp), and [model import](application/model.cpp). The [math module](Math/MathLib.h) provides vector, matrix, projection, and camera-transform operations.
 
-## Validation
-
-The offscreen model-import experiment renders the same house scene used by the windowed application and checks that both meshes, their UVs and textures, and the framebuffer output are present. A [side-by-side image](docs/images/blender-comparison.png) shows the CPU output against a Blender reference. The detailed comparison and reproduction steps are in the [Blender house experiment](experiments/blender_house.md).
-
-A separate [cube-lighting experiment](experiments/README.md) checks directional lighting, normal transformation, depth reset, and repeated-frame behavior.
-
 ## Build and run
 
 **Requirements:** Windows x64, Visual Studio 2022 with the MSVC v143 C++ toolchain, CMake 3.14 or newer, and Ninja. The current CMake configuration expects Assimp headers, import libraries, and DLLs under [`thirdParty`](thirdParty), including the MSVC Debug and Release binaries named in [CMakeLists.txt](CMakeLists.txt). The house OBJ, MTL, and texture atlas must be present under [`assets/model/blender_house`](assets/model/blender_house).
@@ -36,7 +30,7 @@ From the repository root in a Visual Studio developer terminal:
 
 ```powershell
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target softRenderer modelImportExperiment
+cmake --build build --target softRenderer
 
 # The build copies assets beside the executable; run there for relative paths.
 Push-Location build
@@ -44,8 +38,6 @@ Push-Location build
 Pop-Location
 ```
 
-The build commands were verified with Visual Studio's bundled CMake 3.31.6 and Ninja. If a different `cmake.exe` on `PATH` fails during configuration, use the CMake executable bundled with your Visual Studio installation for both commands.
+The build commands were verified with Visual Studio's bundled CMake and Ninja.
 
-Use **W/A/S/D** to move and hold the **right mouse button** while dragging to look around. To run the offscreen model-import smoke test, execute `./build/experiments/modelImportExperiment.exe` from the repository root. The test checks the imported mesh and writes a framebuffer BMP to `out/blender-house-experiment`.
-
-The original experiment notes remain in [`experiments`](experiments); generated images and build outputs under `out/` are ignored by Git. The two images shown above are stored in `docs/images` so they remain visible in a repository clone.
+Use **W/A/S/D** to move and hold the **right mouse button** while dragging to look around. The build copies the house model and texture atlas beside the executable. The image above is a captured framebuffer from the current scene.

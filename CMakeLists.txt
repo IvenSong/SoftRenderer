@@ -52,7 +52,7 @@ add_subdirectory(application)
 add_subdirectory(gpu)
 
 
-add_executable(softRenderer "main.cpp" "prepare.cpp" "prepare.h" "cubeMesh.h")
+add_executable(softRenderer "main.cpp" "prepare.cpp" "prepare.h")
 
 # copy assets into executable file
 add_custom_command(
@@ -66,4 +66,8 @@ add_custom_command(
 target_link_libraries(softRenderer PRIVATE applicationLib gpuLib MathLib)
 target_use_assimp(softRenderer)
 
-add_subdirectory(experiments)
+# Personal experiments are kept outside the published repository. Build them
+# when they are available in a local checkout without making them required.
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/experiments/CMakeLists.txt")
+    add_subdirectory(experiments)
+endif()

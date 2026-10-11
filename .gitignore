@@ -1,3 +1,23 @@
-.vs
-.agent
-out
+.vs/
+.agent/
+.agents/
+out/
+build/
+
+# Local IDE settings, diagnostics, and private experiments.
+CMakeSettings.json
+debug.log
+experiments/
+cubeMesh.h
+assets/model/minimal_triangle/
+assets/texture/
+docs/images/blender-comparison.png
+
+# Assimp build/test artifacts; keep the headers, DLLs, and import libraries used by CMake.
+thirdParty/**/*.pdb
+thirdParty/**/*.exp
+thirdParty/**/unit.exe
+thirdParty/**/unit.lib
+thirdParty/lib/assimp/zlibstaticd.lib
+thirdParty/lib/assimp/cmake/
+thirdParty/lib/assimp/pkgconfig/
